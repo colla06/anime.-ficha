@@ -36,6 +36,7 @@
                  data-logo_alignment="left">
             </div>
             <button id="manualLoginButton" class="p-2 rounded mt-2 hidden">Iniciar Sesión Manualmente</button>
+            <button id="logoutButton" class="p-2 rounded mt-2 hidden">Cerrar Sesión</button>
             <p id="authStatus" class="mt-2 text-yellow-400"></p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
@@ -296,11 +297,22 @@
             document.getElementById('loadPostButton').addEventListener('click', loadPost);
             document.getElementById('publishButton').addEventListener('click', publishPost);
             document.getElementById('manualLoginButton').addEventListener('click', () => {
+                console.log('Botón de login manual clicado');
                 if (tokenClient) {
                     tokenClient.requestAccessToken();
                 } else {
                     showNotice('Error: Cliente de autenticación no inicializado.', 'error');
                 }
+            });
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                console.log('Cerrando sesión...');
+                google.accounts.id.disableAutoSelect();
+                gapi.client.setToken(null);
+                document.getElementById('authStatus').textContent = 'Sesión cerrada. Inicia sesión nuevamente.';
+                document.getElementById('publishButton').disabled = true;
+                document.getElementById('logoutButton').classList.add('hidden');
+                document.getElementById('g_id_signin').classList.remove('hidden');
+                showNotice('Sesión cerrada con éxito.', 'success');
             });
         });
 
@@ -315,12 +327,13 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
-                    redirect_uri: 'https://aquamarine-dasik-089aaf.netlify.app/',
                     callback: (tokenResponse) => {
-                        console.log('Respuesta de autenticación:', tokenResponse);
+                        console.log('Respuesta de token:', tokenResponse);
                         if (tokenResponse.access_token) {
                             document.getElementById('authStatus').textContent = 'Autenticado con éxito';
                             document.getElementById('publishButton').disabled = false;
+                            document.getElementById('g_id_signin').classList.add('hidden');
+                            document.getElementById('logoutButton').classList.remove('hidden');
                             gapi.client.setToken({ access_token: tokenResponse.access_token });
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
@@ -330,6 +343,7 @@
                         }
                     },
                 });
+                document.getElementById('authStatus').textContent = 'Por favor, inicia sesión con Google.';
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
                 document.getElementById('authStatus').textContent = 'Error al inicializar el cliente';
@@ -341,7 +355,7 @@
         function handleCredentialResponse(response) {
             console.log('Respuesta de credenciales recibida:', response);
             if (response.credential) {
-                console.log('Credencial JWT recibida, solicitando token de acceso...');
+                console.log('Credencial JWT recibida:', response.credential);
                 tokenClient.requestAccessToken();
             } else {
                 console.error('No se recibió credencial en la respuesta:', response);
@@ -472,7 +486,6 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(post.content, 'text/html');
 
-            // Información general
             document.getElementById('tituloPrincipal').value = doc.querySelector('.titles--main')?.textContent || post.title || '';
             document.getElementById('tituloAlternativo').value = doc.querySelector('.titles--alt')?.textContent || '';
             document.getElementById('urlPortada').value = doc.querySelector('.anime-info__cover img')?.src || '';
@@ -481,7 +494,6 @@
             document.getElementById('urlAniList').value = doc.querySelector('.misc__links a[href*="anilist.co"]')?.href || '';
             document.getElementById('sinopsis').value = doc.querySelector('.synopsis__content')?.textContent.replace('<!--more-->', '').trim() || '';
 
-            // Estado (manejar inputs radio)
             const estadoValue = doc.querySelector('.airing-status')?.textContent.replace('ESTADO:', '').trim() || 'Finalizado';
             document.getElementsByName('estado').forEach(radio => {
                 radio.checked = radio.value === estadoValue;
@@ -496,7 +508,6 @@
             document.getElementById('tipo').value = doc.querySelector('#format')?.textContent.replace('Tipo:', '').trim() || 'WEBrip';
             document.getElementById('episodios').value = doc.querySelector('.content__details span b')?.textContent || '';
 
-            // Tags (mapear "Historia" a "histórico")
             const tags = Array.from(doc.querySelectorAll('.anime-tags span a')).map(a => {
                 const tagText = a.textContent.toLowerCase();
                 return tagText === 'historia' ? 'histórico' : tagText.replace(/2024 (\w+)/, (match, season) => `2024 ${season.toLowerCase()}`);
@@ -506,7 +517,6 @@
                 option.selected = tags.includes(option.value);
             });
 
-            // 720p HDL
             const table720 = doc.querySelector('.tab__panel#panel--1 .tab-custom-table');
             if (table720) {
                 document.getElementById('fansub720').value = table720.querySelector('tr:nth-child(1) td')?.textContent || '';
@@ -531,7 +541,6 @@
                 document.getElementById('enlaces720').value = table720.querySelector('.custom-detail__panel a[href*="pastebin.com"]')?.href || '';
             }
 
-            // 1080p FHD
             const table1080 = doc.querySelector('.tab__panel#panel--2 .tab-custom-table');
             if (table1080) {
                 document.getElementById('fansub1080').value = table1080.querySelector('tr:nth-child(1) td')?.textContent || '';
