@@ -26,7 +26,6 @@
 <h1>Generador de Ficha Anime Editable con API</h1>
 
 <form id="animeForm">
-  <!-- Campo para buscar por ID de MyAnimeList -->
   <label for="animeId">ID de MyAnimeList (ej. 52215 para "Chi.: Chikyuu no Undou ni Tsuite")</label>
   <div class="search-container">
     <input type="number" id="animeId" placeholder="Ingresa el ID de MyAnimeList" />
@@ -182,216 +181,243 @@
 
   <label for="servidores1080">Servidores (selección múltiple)</label>
   <select id="servidores1080" multiple size="5">
-    <option value="Mega" selected>Mega</option>
-    <option value="MediaFire" selected>MediaFire</option>
-    <option value="Google Drive" selected>Google Drive</option>
-    <option value="TeraBox" selected>TeraBox</option>
     <option value="Index">Index</option>
+    <option value="Mega">Mega</option>
+    <option value="Google Drive">Google Drive</option>
+    <option value="TeraBox" selected>TeraBox</option>
+    <option value="MediaFire">MediaFire</option>
   </select>
 
   <label for="uploader1080">Uploader</label>
-  <input type="text" id="uploader1080" value="NatsuZangetsu27" />
+  <select id="uploader1080">
+    <option value="Colla">Colla</option>
+    <option value="NatsuZangetsu27" selected>NatsuZangetsu27</option>
+    <option value="AnimeySeriesdo">AnimeySeriesdo</option>
+    <option value="Nookcir DOM">Nookcir DOM</option>
+  </select>
 
   <button type="button" id="generateBtn">Generar Código HTML</button>
 </form>
 
-<h2>HTML generado</h2>
+<h2 style="text-align:center;">Código HTML Generado (cópialo y pégalo en Blogger)</h2>
 <pre id="htmlOutput"></pre>
 
+<h2 style="text-align:center;">Vista Previa</h2>
 <div class="preview-container" id="preview"></div>
 
 <script>
-  // Función para traducir texto de inglés a español usando LibreTranslate
-  async function translateToSpanish(text) {
-    if (!text) return '';
-    try {
-      console.log('Texto a traducir:', text);
-      const response = await fetch('https://libretranslate.com/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          q: text,
-          source: 'en',
-          target: 'es',
-          format: 'text'
-        })
-      });
-      if (!response.ok) throw new Error('Error en la traducción');
-      const data = await response.json();
-      console.log('Texto traducido:', data.translatedText);
-      return data.translatedText || text;
-    } catch (error) {
-      console.error('Error en la traducción:', error);
-      return text;
-    }
+// Función para unir elementos con guion
+function joinWithDash(arr) {
+  return arr.length ? arr.join(' - ') : '';
+}
+
+// Función para unir elementos con coma
+function joinWithComa(arr) {
+  return arr.length ? arr.join(', ') : '';
+}
+
+// Función para escapar caracteres HTML
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&apos;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// Función para obtener opciones seleccionadas de un select
+function getSelectedOptions(select) {
+  return Array.from(select.options).filter(o => o.selected).map(o => o.value);
+}
+
+// Función para traducir texto de inglés a español usando LibreTranslate (endpoint libretranslate.de)
+async function translateToSpanish(text) {
+  if (!text) return '';
+  try {
+    const response = await fetch('https://libretranslate.de/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        q: text,
+        source: 'en',
+        target: 'es',
+        format: 'text'
+      })
+    });
+    if (!response.ok) throw new Error('Error en la traducción, status: ' + response.status);
+    const data = await response.json();
+    return data.translatedText || text;
+  } catch (error) {
+    console.error('Error en la traducción:', error);
+    return text; // Devuelve el texto original si falla la traducción
+  }
+}
+
+// Función para buscar datos en la API de Jikan y actualizar el formulario
+document.getElementById('searchBtn').onclick = async function() {
+  const animeId = document.getElementById('animeId').value.trim();
+  const statusElement = document.getElementById('searchStatus');
+
+  if (!animeId) {
+    statusElement.textContent = 'Por favor, ingresa un ID válido de MyAnimeList.';
+    statusElement.style.color = 'red';
+    return;
   }
 
-  // Buscar anime por ID usando API Jikan y traducir sinopsis
-  document.getElementById('searchBtn').onclick = async function() {
-    const animeId = document.getElementById('animeId').value.trim();
-    const statusElement = document.getElementById('searchStatus');
+  statusElement.textContent = 'Buscando datos del anime...';
+  statusElement.style.color = '#555';
 
-    if (!animeId) {
-      statusElement.textContent = 'Por favor, ingresa un ID válido de MyAnimeList.';
-      statusElement.style.color = 'red';
-      return;
-    }
+  try {
+    // Obtener datos de Jikan
+    const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
+    if (!response.ok) throw new Error('Anime no encontrado en la base de datos');
+    const data = await response.json();
+    const anime = data.data;
 
-    statusElement.textContent = 'Buscando datos del anime...';
-    statusElement.style.color = '#555';
+    // Traducir la sinopsis al español
+    const synopsisTranslated = await translateToSpanish(anime.synopsis);
 
-    try {
-      const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-      if (!response.ok) throw new Error('Anime no encontrado en la base de datos');
-      const data = await response.json();
-      const anime = data.data;
+    // Mapeo de datos de la API a los campos del formulario
+    document.getElementById('animeTitleMain').value = anime.title || '';
+    document.getElementById('animeTitleAlt').value = anime.title_japanese || '';
+    document.getElementById('coverUrl').value = anime.images.jpg.image_url || '';
+    document.getElementById('studios').value = anime.studios.map(s => s.name).join(', ') || '';
+    document.getElementById('myAnimeListUrl').value = anime.url || '';
+    document.getElementById('synopsis').value = synopsisTranslated || '';
 
-      console.log('Sinopsis original:', anime.synopsis);
-
-      const synopsisTranslated = await translateToSpanish(anime.synopsis);
-
-      console.log('Sinopsis traducida:', synopsisTranslated);
-
-      document.getElementById('animeTitleMain').value = anime.title || '';
-      document.getElementById('animeTitleAlt').value = anime.title_japanese || '';
-      document.getElementById('coverUrl').value = anime.images.jpg.image_url || '';
-      document.getElementById('studios').value = anime.studios.map(s => s.name).join(', ') || '';
-      document.getElementById('myAnimeListUrl').value = anime.url || '';
-      document.getElementById('synopsis').value = synopsisTranslated || '';
-
-      const estadoMap = {
-        'Finished Airing': 'Finalizado',
-        'Currently Airing': 'En emisión',
-        'Not yet aired': 'En emisión'
-      };
-      document.getElementById('estado').value = estadoMap[anime.status] || 'En emisión';
-
-      document.getElementById('duracion').value = anime.duration ? anime.duration.replace(' per ep', '') : '';
-
-      const temporadaMap = {
-        'winter': 'Invierno',
-        'spring': 'Primavera',
-        'summer': 'Verano',
-        'fall': 'Otoño'
-      };
-      document.getElementById('temporadaEstacion').value = temporadaMap[anime.season] || 'Otoño';
-      document.getElementById('temporadaAnio').value = anime.year || new Date().getFullYear();
-
-      document.getElementById('episodios').value = anime.episodes ? `01/${anime.episodes}` : '';
-
-      statusElement.textContent = 'Datos del anime cargados y sinopsis traducida correctamente.';
-      statusElement.style.color = 'green';
-    } catch (error) {
-      statusElement.textContent = 'Error al cargar los datos: ' + error.message;
-      statusElement.style.color = 'red';
-      console.error('Error en la búsqueda o traducción:', error);
-    }
-  };
-
-  // Generar código HTML basado en los datos del formulario
-  document.getElementById('generateBtn').onclick = function() {
-    const form = document.getElementById('animeForm');
-
-    // Función para obtener valores múltiples de <select multiple>
-    function getSelectedOptions(id) {
-      const select = document.getElementById(id);
-      return Array.from(select.selectedOptions).map(opt => opt.value).join(', ');
-    }
-
-    const data = {
-      animeTitleMain: form.animeTitleMain.value.trim(),
-      animeTitleAlt: form.animeTitleAlt.value.trim(),
-      coverUrl: form.coverUrl.value.trim(),
-      studios: form.studios.value.trim(),
-      myAnimeListUrl: form.myAnimeListUrl.value.trim(),
-      animeListUrl: form.animeListUrl.value.trim(),
-      synopsis: form.synopsis.value.trim(),
-      estado: form.estado.value,
-      duracion: form.duracion.value.trim(),
-      temporadaEstacion: form.temporadaEstacion.value,
-      temporadaAnio: form.temporadaAnio.value,
-      tipo: form.tipo.value,
-      episodios: form.episodios.value.trim(),
-      fansub720: form.fansub720.value.trim(),
-      subtitulos720: form.subtitulos720.value.trim(),
-      idioma720: getSelectedOptions('idioma720'),
-      encoder720: form.encoder720.value.trim(),
-      formato720: form.formato720.value,
-      resolucion720: form.resolucion720.value,
-      comprimido720: form.comprimido720.value,
-      calidad720: form.calidad720.value,
-      tamano720: form.tamano720.value.trim(),
-      servidores720: getSelectedOptions('servidores720'),
-      uploader720: form.uploader720.value.trim(),
-      fansub1080: form.fansub1080.value.trim(),
-      subtitulos1080: form.subtitulos1080.value.trim(),
-      idioma1080: getSelectedOptions('idioma1080'),
-      ripper1080: form.ripper1080.value.trim(),
-      rawEncode1080: form.rawEncode1080.value.trim(),
-      muxeo1080: form.muxeo1080.value.trim(),
-      formato1080: form.formato1080.value,
-      resolucion1080: form.resolucion1080.value,
-      comprimido1080: form.comprimido1080.value,
-      calidad1080: form.calidad1080.value,
-      tamano1080: form.tamano1080.value.trim(),
-      servidores1080: getSelectedOptions('servidores1080'),
-      uploader1080: form.uploader1080.value.trim()
+    // Mapeo de estado
+    const estadoMap = {
+      'Finished Airing': 'Finalizado',
+      'Currently Airing': 'En emisión',
+      'Not yet aired': 'En emisión'
     };
+    document.getElementById('estado').value = estadoMap[anime.status] || 'En emisión';
 
-    // Código HTML generado
-    const htmlCode = `
+    // Duración
+    document.getElementById('duracion').value = anime.duration ? anime.duration.replace(' per ep', '') : '';
+
+    // Temporada
+    const temporadaMap = {
+      'winter': 'Invierno',
+      'spring': 'Primavera',
+      'summer': 'Verano',
+      'fall': 'Otoño'
+    };
+    document.getElementById('temporadaEstacion').value = temporadaMap[anime.season] || 'Otoño';
+    document.getElementById('temporadaAnio').value = anime.year || new Date().getFullYear();
+
+    // Episodios (formato "XX/Total")
+    document.getElementById('episodios').value = anime.episodes ? `01/${anime.episodes}` : '';
+
+    statusElement.textContent = 'Datos del anime cargados y sinopsis traducida correctamente.';
+    statusElement.style.color = 'green';
+  } catch (error) {
+    statusElement.textContent = 'Error al cargar los datos: ' + error.message;
+    statusElement.style.color = 'red';
+  }
+};
+
+// Función para generar el código HTML
+document.getElementById('generateBtn').onclick = function() {
+  const titleMain = escapeHtml(document.getElementById('animeTitleMain').value.trim());
+  const titleAlt = escapeHtml(document.getElementById('animeTitleAlt').value.trim());
+  const coverUrl = escapeHtml(document.getElementById('coverUrl').value.trim());
+  const studios = escapeHtml(document.getElementById('studios').value.trim());
+  const malUrl = escapeHtml(document.getElementById('myAnimeListUrl').value.trim());
+  const anilistUrl = escapeHtml(document.getElementById('animeListUrl').value.trim());
+  const synopsis = escapeHtml(document.getElementById('synopsis').value.trim());
+  const estado = escapeHtml(document.getElementById('estado').value.trim());
+  const duracion = escapeHtml(document.getElementById('duracion').value.trim());
+  const temporadaEstacion = escapeHtml(document.getElementById('temporadaEstacion').value.trim());
+  const temporadaAnio = escapeHtml(document.getElementById('temporadaAnio').value.trim());
+  const tipo = escapeHtml(document.getElementById('tipo').value.trim());
+  const episodios = escapeHtml(document.getElementById('episodios').value.trim());
+
+  // Datos 720p
+  const fansub720 = escapeHtml(document.getElementById('fansub720').value.trim());
+  const subtitulos720 = escapeHtml(document.getElementById('subtitulos720').value.trim());
+  const idioma720 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('idioma720'))));
+  const encoder720 = escapeHtml(document.getElementById('encoder720').value.trim());
+  const formato720 = escapeHtml(document.getElementById('formato720').value.trim());
+  const resolucion720 = escapeHtml(document.getElementById('resolucion720').value.trim());
+  const comprimido720 = escapeHtml(document.getElementById('comprimido720').value.trim());
+  const calidad720 = escapeHtml(document.getElementById('calidad720').value.trim());
+  const tamano720 = escapeHtml(document.getElementById('tamano720').value.trim());
+  const servidores720 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('servidores720'))));
+  const uploader720 = escapeHtml(document.getElementById('uploader720').value.trim());
+
+  // Datos 1080p
+  const fansub1080 = escapeHtml(document.getElementById('fansub1080').value.trim());
+  const subtitulos1080 = escapeHtml(document.getElementById('subtitulos1080').value.trim());
+  const idioma1080 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('idioma1080'))));
+  const ripper1080 = escapeHtml(document.getElementById('ripper1080').value.trim());
+  const rawEncode1080 = escapeHtml(document.getElementById('rawEncode1080').value.trim());
+  const muxeo1080 = escapeHtml(document.getElementById('muxeo1080').value.trim());
+  const formato1080 = escapeHtml(document.getElementById('formato1080').value.trim());
+  const resolucion1080 = escapeHtml(document.getElementById('resolucion1080').value.trim());
+  const comprimido1080 = escapeHtml(document.getElementById('comprimido1080').value.trim());
+  const calidad1080 = escapeHtml(document.getElementById('calidad1080').value.trim());
+  const tamano1080 = escapeHtml(document.getElementById('tamano1080').value.trim());
+  const servidores1080 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('servidores1080'))));
+  const uploader1080 = escapeHtml(document.getElementById('uploader1080').value.trim());
+
+  // Generar el código HTML en formato que quieres usar
+  const htmlCode = `
+<!-- FICHA ANIME GENERADA -->
 <div class="ficha-anime">
-  <h2>${data.animeTitleMain}</h2>
-  <h3>${data.animeTitleAlt}</h3>
-  <img src="${data.coverUrl}" alt="Portada de ${data.animeTitleMain}" style="max-width:250px;" />
-  <p><strong>Estudio:</strong> ${data.studios}</p>
-  <p><strong>URL MAL:</strong> <a href="${data.myAnimeListUrl}" target="_blank">${data.myAnimeListUrl}</a></p>
-  <p><strong>URL AniList:</strong> <a href="${data.animeListUrl}" target="_blank">${data.animeListUrl}</a></p>
-  <p><strong>Sinopsis:</strong> ${data.synopsis}</p>
-  <p><strong>Estado:</strong> ${data.estado}</p>
-  <p><strong>Duración:</strong> ${data.duracion}</p>
-  <p><strong>Temporada:</strong> ${data.temporadaEstacion} ${data.temporadaAnio}</p>
-  <p><strong>Tipo:</strong> ${data.tipo}</p>
-  <p><strong>Episodios:</strong> ${data.episodios}</p>
+  <h2>${titleMain}</h2>
+  <h3>${titleAlt}</h3>
+  <img src="${coverUrl}" alt="Portada de ${titleMain}" style="max-width:200px;" />
+  <p><strong>Estudio(s):</strong> ${studios}</p>
+  <p><strong>Estado:</strong> ${estado}</p>
+  <p><strong>Duración:</strong> ${duracion}</p>
+  <p><strong>Temporada:</strong> ${temporadaEstacion} ${temporadaAnio}</p>
+  <p><strong>Tipo:</strong> ${tipo}</p>
+  <p><strong>Episodios:</strong> ${episodios}</p>
+  <p><strong>Sinopsis:</strong> ${synopsis}</p>
+  <p><a href="${malUrl}" target="_blank" rel="noopener">Ver en MyAnimeList</a> | <a href="${anilistUrl}" target="_blank" rel="noopener">Ver en AniList</a></p>
 
-  <h4>Datos 720p HDL</h4>
-  <p><strong>Fansub:</strong> ${data.fansub720}</p>
-  <p><strong>Subtítulos:</strong> ${data.subtitulos720}</p>
-  <p><strong>Idioma:</strong> ${data.idioma720}</p>
-  <p><strong>Encoder:</strong> ${data.encoder720}</p>
-  <p><strong>Formato:</strong> ${data.formato720}</p>
-  <p><strong>Resolución:</strong> ${data.resolucion720}</p>
-  <p><strong>Comprimido:</strong> ${data.comprimido720}</p>
-  <p><strong>Calidad:</strong> ${data.calidad720}</p>
-  <p><strong>Tamaño por archivo:</strong> ${data.tamano720}</p>
-  <p><strong>Servidores:</strong> ${data.servidores720}</p>
-  <p><strong>Uploader:</strong> ${data.uploader720}</p>
+  <h4>720p HDL</h4>
+  <ul>
+    <li>Fansub: ${fansub720}</li>
+    <li>Subtítulos: ${subtitulos720}</li>
+    <li>Idioma (Audio): ${idioma720}</li>
+    <li>Encoder: ${encoder720}</li>
+    <li>Formato: ${formato720}</li>
+    <li>Resolución: ${resolucion720}</li>
+    <li>Comprimido: ${comprimido720}</li>
+    <li>Calidad: ${calidad720}</li>
+    <li>Tamaño por archivo: ${tamano720}</li>
+    <li>Servidores: ${servidores720}</li>
+    <li>Uploader: ${uploader720}</li>
+  </ul>
 
-  <h4>Datos 1080p FHD</h4>
-  <p><strong>Fansub:</strong> ${data.fansub1080}</p>
-  <p><strong>Subtítulos:</strong> ${data.subtitulos1080}</p>
-  <p><strong>Idioma:</strong> ${data.idioma1080}</p>
-  <p><strong>Ripper:</strong> ${data.ripper1080}</p>
-  <p><strong>Raw/Encode:</strong> ${data.rawEncode1080}</p>
-  <p><strong>Muxeo:</strong> ${data.muxeo1080}</p>
-  <p><strong>Formato:</strong> ${data.formato1080}</p>
-  <p><strong>Resolución:</strong> ${data.resolucion1080}</p>
-  <p><strong>Comprimido:</strong> ${data.comprimido1080}</p>
-  <p><strong>Calidad:</strong> ${data.calidad1080}</p>
-  <p><strong>Tamaño por archivo:</strong> ${data.tamano1080}</p>
-  <p><strong>Servidores:</strong> ${data.servidores1080}</p>
-  <p><strong>Uploader:</strong> ${data.uploader1080}</p>
+  <h4>1080p FHD</h4>
+  <ul>
+    <li>Fansub: ${fansub1080}</li>
+    <li>Subtítulos: ${subtitulos1080}</li>
+    <li>Idioma (Audio): ${idioma1080}</li>
+    <li>Ripper: ${ripper1080}</li>
+    <li>Raw/Encode: ${rawEncode1080}</li>
+    <li>Muxeo: ${muxeo1080}</li>
+    <li>Formato: ${formato1080}</li>
+    <li>Resolución: ${resolucion1080}</li>
+    <li>Comprimido: ${comprimido1080}</li>
+    <li>Calidad: ${calidad1080}</li>
+    <li>Tamaño por archivo: ${tamano1080}</li>
+    <li>Servidores: ${servidores1080}</li>
+    <li>Uploader: ${uploader1080}</li>
+  </ul>
 </div>
-`.trim();
+<!-- FIN FICHA ANIME -->
+`;
 
-    // Mostrar el código en el textarea
-    const output = document.getElementById('htmlOutput');
-    output.textContent = htmlCode;
-
-    // Mostrar vista previa
-    const preview = document.getElementById('preview');
-    preview.innerHTML = htmlCode;
-  };
+  document.getElementById('htmlOutput').textContent = htmlCode.trim();
+  document.getElementById('preview').innerHTML = htmlCode.trim();
+};
 </script>
 
 </body>
