@@ -35,7 +35,8 @@
                  data-shape="rectangular"
                  data-logo_alignment="left">
             </div>
-            <p id="authStatus" class="mt-2"></p>
+            <button id="manualLoginButton" class="p-2 rounded mt-2 hidden">Iniciar Sesión Manualmente</button>
+            <p id="authStatus" class="mt-2 text-yellow-400"></p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
         </div>
@@ -282,6 +283,7 @@
             if (typeof google === 'undefined' || !google.accounts) {
                 console.error('Error: google.accounts no está definido. Verifica la carga de https://accounts.google.com/gsi/client');
                 showNotice('Error al cargar la biblioteca de Google Sign-In.', 'error');
+                document.getElementById('manualLoginButton').classList.remove('hidden');
                 return;
             }
 
@@ -293,6 +295,13 @@
             document.getElementById('searchButton').addEventListener('click', searchAnime);
             document.getElementById('loadPostButton').addEventListener('click', loadPost);
             document.getElementById('publishButton').addEventListener('click', publishPost);
+            document.getElementById('manualLoginButton').addEventListener('click', () => {
+                if (tokenClient) {
+                    tokenClient.requestAccessToken();
+                } else {
+                    showNotice('Error: Cliente de autenticación no inicializado.', 'error');
+                }
+            });
         });
 
         async function initializeGapiClient() {
@@ -316,19 +325,29 @@
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
                             console.error('Error en la autenticación:', tokenResponse);
+                            document.getElementById('authStatus').textContent = 'Error en la autenticación';
                             showNotice('Error en la autenticación: ' + (tokenResponse.error_description || 'Desconocido'), 'error');
                         }
                     },
                 });
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
+                document.getElementById('authStatus').textContent = 'Error al inicializar el cliente';
                 showNotice('Error al inicializar el cliente de Google: ' + error.message, 'error');
+                document.getElementById('manualLoginButton').classList.remove('hidden');
             }
         }
 
         function handleCredentialResponse(response) {
             console.log('Respuesta de credenciales recibida:', response);
-            tokenClient.requestAccessToken();
+            if (response.credential) {
+                console.log('Credencial JWT recibida, solicitando token de acceso...');
+                tokenClient.requestAccessToken();
+            } else {
+                console.error('No se recibió credencial en la respuesta:', response);
+                document.getElementById('authStatus').textContent = 'Error: No se recibió credencial';
+                showNotice('Error: No se recibió credencial de Google.', 'error');
+            }
         }
 
         function showNotice(message, type) {
@@ -336,7 +355,7 @@
             notice.className = `notice notice-${type}`;
             notice.textContent = message;
             document.body.appendChild(notice);
-            setTimeout(() => notice.remove(), 3000);
+            setTimeout(() => notice.remove(), 5000);
         }
 
         async function searchAnime() {
@@ -423,6 +442,10 @@
             const postId = document.getElementById('postId').value.trim();
             if (!blogId || !postId) {
                 showNotice('Introduce el ID del blog y de la entrada.', 'error');
+                return;
+            }
+            if (!gapi.client.getToken()?.access_token) {
+                showNotice('No estás autenticado. Por favor, inicia sesión primero.', 'error');
                 return;
             }
 
@@ -544,6 +567,10 @@
             const publishStatus = document.getElementById('publishStatus').value;
             if (!blogId) {
                 showNotice('Introduce el ID del blog.', 'error');
+                return;
+            }
+            if (!gapi.client.getToken()?.access_token) {
+                showNotice('No estás autenticado. Por favor, inicia sesión primero.', 'error');
                 return;
             }
 
