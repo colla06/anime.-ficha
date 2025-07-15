@@ -1,29 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Generador de Ficha Anime Editable</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
-  h1 { text-align: center; }
-  form { max-width: 900px; margin: 0 auto 2rem; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px #ccc;}
-  label { display: block; margin-top: 12px; font-weight: bold; }
-  input[type=text], select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
-  select[multiple] { height: 100px; }
-  .small-input { max-width: 150px; }
-  button { margin-top: 20px; padding: 10px 16px; font-size: 16px; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
-  button:hover { background: #004999; }
-  #htmlOutput { white-space: pre-wrap; background: #222; color: #eee; padding: 10px; border-radius: 6px; overflow-x: auto; max-height: 500px; }
-  .preview-container { max-width: 900px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
-  .note { font-size: 0.9rem; color: #555; margin-top: -10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de Ficha Anime Editable con API</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+    h1 { text-align: center; }
+    form { max-width: 900px; margin: 0 auto 2rem; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px #ccc;}
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input[type=text], select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    select[multiple] { height: 100px; }
+    .small-input { max-width: 150px; }
+    button { margin-top: 20px; padding: 10px 16px; font-size: 16px; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
+    button:hover { background: #004999; }
+    #htmlOutput { white-space: pre-wrap; background: #222; color: #eee; padding: 10px; border-radius: 6px; overflow-x: auto; max-height: 500px; }
+    .preview-container { max-width: 900px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
+    .note { font-size: 0.9rem; color: #555; margin-top: -10px; }
+    .search-container { display: flex; gap: 10px; align-items: center; }
+    #searchStatus { color: #555; margin-top: 10px; }
+  </style>
 </head>
 <body>
 
-<h1>Generador de Ficha Anime Editable</h1>
+<h1>Generador de Ficha Anime Editable con API</h1>
 
 <form id="animeForm">
+  <!-- Campo de búsqueda por ID de MyAnimeList -->
+  <label for="animeId">ID de MyAnimeList (ej. 52215)</label>
+  <div class="search-container">
+    <input type="number" id="animeId" placeholder="Ingresa el ID de MyAnimeList" />
+    <button type="button" id="searchBtn">Buscar</button>
+  </div>
+  <div id="searchStatus"></div>
 
   <label for="animeTitleMain">Título principal</label>
   <input type="text" id="animeTitleMain" required value="Chi.: Chikyuu no Undou ni Tsuite" />
@@ -210,15 +219,76 @@ function escapeHtml(text) {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;',
+    "'": '&#039;'
   };
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 function getSelectedOptions(select) {
   return Array.from(select.options).filter(o => o.selected).map(o => o.value);
 }
+
+// Función para buscar datos en la API de Jikan
+document.getElementById('searchBtn').onclick = async function() {
+  const animeId = document.getElementById('animeId').value.trim();
+  const statusElement = document.getElementById('searchStatus');
+
+  if (!animeId) {
+    statusElement.textContent = 'Por favor, ingresa un ID de MyAnimeList válido.';
+    statusElement.style.color = 'red';
+    return;
+  }
+
+  statusElement.textContent = 'Buscando...';
+  statusElement.style.color = '#555';
+
+  try {
+    const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
+    if (!response.ok) throw new Error('Anime no encontrado');
+    const data = await response.json();
+    const anime = data.data;
+
+    // Mapeo de datos de la API a los campos del formulario
+    document.getElementById('animeTitleMain').value = anime.title || '';
+    document.getElementById('animeTitleAlt').value = anime.title_japanese || '';
+    document.getElementById('coverUrl').value = anime.images.jpg.image_url || '';
+    document.getElementById('studios').value = anime.studios.map(s => s.name).join(', ') || '';
+    document.getElementById('myAnimeListUrl').value = anime.url || '';
+    document.getElementById('synopsis').value = anime.synopsis || '';
+    
+    // Mapeo de estado
+    const estadoMap = {
+      'Finished Airing': 'Finalizado',
+      'Currently Airing': 'En emisión',
+      'Not yet aired': 'En emisión' // Ajustar según necesidades
+    };
+    document.getElementById('estado').value = estadoMap[anime.status] || 'En emisión';
+
+    // Duración
+    document.getElementById('duracion').value = anime.duration ? anime.duration.replace(' per ep', '') : '';
+
+    // Temporada
+    const temporadaMap = {
+      'winter': 'Invierno',
+      'spring': 'Primavera',
+      'summer': 'Verano',
+      'fall': 'Otoño'
+    };
+    document.getElementById('temporadaEstacion').value = temporadaMap[anime.season] || 'Otoño';
+    document.getElementById('temporadaAnio').value = anime.year || new Date().getFullYear();
+
+    // Episodios (formato "XX/Total")
+    document.getElementById('episodios').value = anime.episodes ? `01/${anime.episodes}` : '';
+
+    statusElement.textContent = 'Datos cargados correctamente.';
+    statusElement.style.color = 'green';
+  } catch (error) {
+    statusElement.textContent = 'Error al cargar los datos: ' + error.message;
+    statusElement.style.color = 'red';
+  }
+};
+
+// Generar HTML (mismo código original)
 document.getElementById('generateBtn').onclick = function() {
-  // Obtener valores
   const titleMain = escapeHtml(document.getElementById('animeTitleMain').value.trim());
   const titleAlt = escapeHtml(document.getElementById('animeTitleAlt').value.trim());
   const coverUrl = escapeHtml(document.getElementById('coverUrl').value.trim());
@@ -261,11 +331,9 @@ document.getElementById('generateBtn').onclick = function() {
   const servidores1080 = getSelectedOptions(document.getElementById('servidores1080'));
   const uploader1080 = escapeHtml(document.getElementById('uploader1080').value);
 
-  // Construir servidores con " - "
   const servidores720Str = joinWithDash(servidores720);
   const servidores1080Str = joinWithDash(servidores1080);
 
-  // Construir HTML completo (con saltos de línea y tabulación para mejor lectura)
   const html = `
 <main class="anime-main">
   <section>
@@ -414,13 +482,8 @@ document.getElementById('generateBtn').onclick = function() {
 </main>
 `.trim();
 
-  // Mostrar el HTML generado en el textarea
   document.getElementById('htmlOutput').textContent = html;
-
-  // Mostrar preview
   document.getElementById('preview').innerHTML = html;
-
-  // Mostrar la primera pestaña (720p) por defecto
   showPanel(0);
 };
 
@@ -436,10 +499,10 @@ function toggleDetails(btn) {
   const panel = btn.nextElementSibling;
   if (panel.style.display === 'none') {
     panel.style.display = 'block';
-    btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Mostrar', 'Ocultar');
+    btn.querySelector('.btn__text') ? btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Mostrar', 'Ocultar') : btn.textContent = btn.textContent.replace('Mostrar', 'Ocultar');
   } else {
     panel.style.display = 'none';
-    btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Ocultar', 'Mostrar');
+    btn.querySelector('.btn__text') ? btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Ocultar', 'Mostrar') : btn.textContent = btn.textContent.replace('Ocultar', 'Mostrar');
   }
 }
 </script>
