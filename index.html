@@ -233,29 +233,17 @@ function getSelectedOptions(select) {
   return Array.from(select.options).filter(o => o.selected).map(o => o.value);
 }
 
-// Función para traducir texto de inglés a español usando LibreTranslate
+// Función para traducir texto de inglés a español usando Lingva Translate
 async function translateToSpanish(text) {
   if (!text) return '';
   try {
-    console.log('Texto a traducir:', text); // Depuración: muestra el texto original
-    const response = await fetch('https://libretranslate.com/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        q: text,
-        source: 'en',
-        target: 'es',
-        format: 'text'
-      })
-    });
-    console.log('Respuesta de la API:', response); // Depuración: muestra la respuesta
+    const response = await fetch(`https://lingva.ml/api/v1/en/es/${encodeURIComponent(text)}`);
     if (!response.ok) throw new Error('Error en la traducción, status: ' + response.status);
     const data = await response.json();
-    console.log('Datos traducidos:', data); // Depuración: muestra los datos devueltos
-    return data.translatedText || text;
+    return data.translation || text; // Lingva devuelve el campo 'translation'
   } catch (error) {
-    console.error('Error en la traducción:', error); // Depuración: muestra el error
-    return text; // Devuelve el texto original si falla la traducción
+    console.error('Error en la traducción:', error);
+    return text; // Devuelve el texto original si falla
   }
 }
 
