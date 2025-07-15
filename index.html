@@ -40,7 +40,7 @@
   <label for="animeTitleAlt">Título alternativo</label>
   <input type="text" id="animeTitleAlt" required value="チ。―地球の運動について―" />
 
-  <label for="coverUrl">URL de la portada (imagen)</label>
+  <label for="coverUrl">URLโครงการ de la portada (imagen)</label>
   <input type="text" id="coverUrl" required value="https://i.ibb.co/s9z7pf1/Chi-Chikyuu-no-Undou-ni-Tsuite.webp" />
 
   <label for="studios">Estudio(s)</label>
@@ -224,7 +224,7 @@ function escapeHtml(text) {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;'
+    "'": '&apos;'
   };
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
@@ -232,6 +232,29 @@ function escapeHtml(text) {
 // Función para obtener opciones seleccionadas de un select
 function getSelectedOptions(select) {
   return Array.from(select.options).filter(o => o.selected).map(o => o.value);
+}
+
+// Función para traducir texto de inglés a español usando LibreTranslate
+async function translateToSpanish(text) {
+  if (!text) return '';
+  try {
+    const response = await fetch('https://libretranslate.com/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        q: text,
+        source: 'en',
+        target: 'es',
+        format: 'text'
+      })
+    });
+    if (!response.ok) throw new Error('Error en la traducción');
+    const data = await response.json();
+    return data.translatedText || text;
+  } catch (error) {
+    console.error('Error en la traducción:', error);
+    return text; // Devuelve el texto original si falla la traducción
+  }
 }
 
 // Función para buscar datos en la API de Jikan
@@ -249,10 +272,14 @@ document.getElementById('searchBtn').onclick = async function() {
   statusElement.style.color = '#555';
 
   try {
+    // Obtener datos de Jikan
     const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
     if (!response.ok) throw new Error('Anime no encontrado en la base de datos');
     const data = await response.json();
     const anime = data.data;
+
+    // Traducir la sinopsis al español
+    const synopsisTranslated = await translateToSpanish(anime.synopsis);
 
     // Mapeo de datos de la API a los campos del formulario
     document.getElementById('animeTitleMain').value = anime.title || '';
@@ -260,7 +287,7 @@ document.getElementById('searchBtn').onclick = async function() {
     document.getElementById('coverUrl').value = anime.images.jpg.image_url || '';
     document.getElementById('studios').value = anime.studios.map(s => s.name).join(', ') || '';
     document.getElementById('myAnimeListUrl').value = anime.url || '';
-    document.getElementById('synopsis').value = anime.synopsis || '';
+    document.getElementById('synopsis').value = synopsisTranslated || '';
     
     // Mapeo de estado
     const estadoMap = {
@@ -286,7 +313,7 @@ document.getElementById('searchBtn').onclick = async function() {
     // Episodios (formato "XX/Total")
     document.getElementById('episodios').value = anime.episodes ? `01/${anime.episodes}` : '';
 
-    statusElement.textContent = 'Datos del anime cargados correctamente.';
+    statusElement.textContent = 'Datos del anime cargados y sinopsis traducida correctamente.';
     statusElement.style.color = 'green';
   } catch (error) {
     statusElement.textContent = 'Error al cargar los datos: ' + error.message;
@@ -389,8 +416,6 @@ document.getElementById('generateBtn').onclick = function() {
       Duración:<br>${duracion}
     </span>
     <span class="season">
-
-
       <svg class="i i-calendar" viewBox="0 0 24 24">
         <rect width="18" height="17" x="3" y="5" rx="2"></rect>
         <path d="M7 2v3m10-3v3M3 10h18"></path>
@@ -412,7 +437,6 @@ document.getElementById('generateBtn').onclick = function() {
     </span>
   </div>
   <section class="anime-related"></section>
-  <hr class="break-line">
   <!-- Contraseña -->
   <div style="text-align: center;">
     <b><u>Contraseña:</u></b> 
