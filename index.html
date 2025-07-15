@@ -24,423 +24,70 @@
 <h1>Generador de Ficha Anime Editable</h1>
 
 <form id="animeForm">
-
-  <label for="animeTitleMain">Título principal</label>
-  <input type="text" id="animeTitleMain" required value="Chi.: Chikyuu no Undou ni Tsuite" />
-
-  <label for="animeTitleAlt">Título alternativo</label>
-  <input type="text" id="animeTitleAlt" required value="チ。―地球の運動について―" />
-
-  <label for="coverUrl">URL de la portada (imagen)</label>
-  <input type="text" id="coverUrl" required value="https://i.ibb.co/s9z7pf1/Chi-Chikyuu-no-Undou-ni-Tsuite.webp" />
-
-  <label for="studios">Estudio(s)</label>
-  <input type="text" id="studios" required value="Madhouse" />
-
-  <label for="myAnimeListUrl">URL MyAnimeList</label>
-  <input type="text" id="myAnimeListUrl" value="https://myanimelist.net/anime/52215/Chi__Chikyuu_no_Undou_ni_Tsuite" />
-
-  <label for="animeListUrl">URL AniList</label>
-  <input type="text" id="animeListUrl" value="https://anilist.co/anime/151514/Chi-Chikyuu-no-Undou-ni-Tsuite/" />
-
-  <label for="synopsis">Sinopsis</label>
-  <textarea id="synopsis" rows="5" required>Polonia del siglo XV, una época en la que las ideas heréticas conducían a quemar en la hoguera a quienes poseían esa mentalidad. Rafał, un niño prodigio, debía especializarse en teología en la universidad, la materia más importante en aquella época. Sin embargo, un día conoce a un hombre misterioso y comienza a investigar una posible "verdad" entre las ideas heréticas.</textarea>
-
-  <label for="estado">Estado</label>
-  <select id="estado" required>
-    <option value="Finalizado" selected>Finalizado</option>
-    <option value="En emisión">En emisión</option>
-  </select>
-
-  <label for="duracion">Duración</label>
-  <input type="text" id="duracion" required value="24min" />
-
-  <label for="temporadaEstacion">Temporada (estación)</label>
-  <select id="temporadaEstacion" required>
-    <option value="Invierno">Invierno</option>
-    <option value="Primavera">Primavera</option>
-    <option value="Verano">Verano</option>
-    <option value="Otoño" selected>Otoño</option>
-  </select>
-
-  <label for="temporadaAnio">Temporada (año)</label>
-  <input type="number" id="temporadaAnio" required min="2000" max="2100" value="2024" />
-
-  <label for="tipo">Tipo</label>
-  <select id="tipo" required>
-    <option value="WEBrip" selected>WEBrip</option>
-    <option value="BD">BD</option>
-  </select>
-
-  <label for="episodios">Episodios (ej. 06/25)</label>
-  <input type="text" id="episodios" required value="06/25" />
-
-  <label><strong>Datos 720p HDL</strong></label>
-
-  <label for="fansub720">Fansub</label>
-  <input type="text" id="fansub720" value="Ninguno (Subs de NF)[Edit NatsuZangetsu]" />
-
-  <label for="subtitulos720">Subtítulos (Español España y Español Latino)</label>
-  <input type="text" id="subtitulos720" value="Español Neutro" />
-
-  <label for="idioma720">Idioma (Audio) (Selecciona múltiples con Ctrl o Cmd)</label>
-  <select id="idioma720" multiple size="3">
-    <option value="Japonés" selected>Japonés</option>
-    <option value="Latino">Latino</option>
-    <option value="Castellano">Castellano</option>
-  </select>
-
-  <label for="encoder720">Encoder</label>
-  <input type="text" id="encoder720" value="NatsuZangetsu27" />
-
-  <label for="formato720">Formato (siempre MP4 (x264))</label>
-  <input type="text" id="formato720" readonly value="MP4 (x264)" />
-
-  <label for="resolucion720">Resolución (siempre 1280x720)</label>
-  <input type="text" id="resolucion720" readonly value="1280x720" />
-
-  <label for="comprimido720">Comprimido</label>
-  <select id="comprimido720">
-    <option value="Si" selected>Si</option>
-    <option value="No">No</option>
-  </select>
-
-  <label for="calidad720">Calidad (siempre Muy buena)</label>
-  <input type="text" id="calidad720" readonly value="Muy buena" />
-
-  <label for="tamano720">Tamaño por archivo</label>
-  <input type="text" id="tamano720" value="132MB" />
-
-  <label for="servidores720">Servidores (selección múltiple)</label>
-  <select id="servidores720" multiple size="5">
-    <option value="Mega" selected>Mega</option>
-    <option value="MediaFire" selected>MediaFire</option>
-    <option value="Google Drive">Google Drive</option>
-    <option value="TeraBox">TeraBox</option>
-    <option value="Index">Index</option>
-  </select>
-
-  <label for="uploader720">Uploader</label>
-  <input type="text" id="uploader720" value="NatsuZangetsu27" />
-
-  <hr />
-
-  <label><strong>Datos 1080p FHD</strong></label>
-
-  <label for="fansub1080">Fansub</label>
-  <input type="text" id="fansub1080" value="Ninguno (Subs de NF)[Edit NatsuZangetsu]" />
-
-  <label for="subtitulos1080">Subtítulos (Español España y Español Latino)</label>
-  <input type="text" id="subtitulos1080" value="Español" />
-
-  <label for="idioma1080">Idioma (Audio) (Selecciona múltiples con Ctrl o Cmd)</label>
-  <select id="idioma1080" multiple size="3">
-    <option value="Japonés" selected>Japonés</option>
-    <option value="Latino">Latino</option>
-    <option value="Castellano">Castellano</option>
-  </select>
-
-  <label for="ripper1080">Ripper</label>
-  <input type="text" id="ripper1080" value="VARYG" />
-
-  <label for="rawEncode1080">Raw/Encode</label>
-  <input type="text" id="rawEncode1080" value="DKBTeam" />
-
-  <label for="muxeo1080">Muxeo</label>
-  <input type="text" id="muxeo1080" value="NatsuZangetsu27" />
-
-  <label for="formato1080">Formato</label>
-  <select id="formato1080" required>
-    <option value="MKV (x265)" selected>MKV (x265)</option>
-    <option value="MP4 (x264)">MP4 (x264)</option>
-    <option value="MKV (x264)">MKV (x264)</option>
-  </select>
-
-  <label for="resolucion1080">Resolución (siempre 1920x1080)</label>
-  <input type="text" id="resolucion1080" readonly value="1920x1080" />
-
-  <label for="comprimido1080">Comprimido</label>
-  <select id="comprimido1080">
-    <option value="Si" selected>Si</option>
-    <option value="No">No</option>
-  </select>
-
-  <label for="calidad1080">Calidad (siempre Excelente)</label>
-  <input type="text" id="calidad1080" readonly value="Excelente" />
-
-  <label for="tamano1080">Tamaño por archivo</label>
-  <input type="text" id="tamano1080" value="220MB aprox~" />
-
-  <label for="servidores1080">Servidores (selección múltiple)</label>
-  <select id="servidores1080" multiple size="5">
-    <option value="Index">Index</option>
-    <option value="Mega">Mega</option>
-    <option value="Google Drive">Google Drive</option>
-    <option value="TeraBox" selected>TeraBox</option>
-    <option value="MediaFire">MediaFire</option>
-  </select>
-
-  <label for="uploader1080">Uploader</label>
-  <select id="uploader1080">
-    <option value="Colla">Colla</option>
-    <option value="NatsuZangetsu27" selected>NatsuZangetsu27</option>
-    <option value="AnimeySeriesdo">AnimeySeriesdo</option>
-    <option value="Nookcir DOM">Nookcir DOM</option>
-  </select>
-
-  <button type="button" id="generateBtn">Generar HTML</button>
+  <label for="searchTitle">Buscar título en AniList</label>
+  <input type="text" id="searchTitle" placeholder="Ejemplo: Fullmetal Alchemist" />
+  <button type="button" onclick="searchAnime()">Buscar y completar</button>
+  <p class="note">Esto buscará título, imagen, estudio, sinopsis y enlaces de AniList y MyAnimeList automáticamente</p>
 </form>
 
-<h2 style="text-align:center;">HTML Generado (cópialo y pégalo en Blogger)</h2>
-<pre id="htmlOutput"></pre>
+<form id="animeFormMain">
+  <!-- Aquí va TODO tu formulario original -->
+</form>
 
-<h2 style="text-align:center;">Vista Previa</h2>
+<pre id="htmlOutput"></pre>
 <div class="preview-container" id="preview"></div>
 
 <script>
-function joinWithDash(arr) {
-  return arr.length ? arr.join(' - ') : '';
-}
-function joinWithComa(arr) {
-  return arr.length ? arr.join(', ') : '';
-}
-function escapeHtml(text) {
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-}
-function getSelectedOptions(select) {
-  return Array.from(select.options).filter(o => o.selected).map(o => o.value);
-}
-document.getElementById('generateBtn').onclick = function() {
-  // Obtener valores
-  const titleMain = escapeHtml(document.getElementById('animeTitleMain').value.trim());
-  const titleAlt = escapeHtml(document.getElementById('animeTitleAlt').value.trim());
-  const coverUrl = escapeHtml(document.getElementById('coverUrl').value.trim());
-  const studios = escapeHtml(document.getElementById('studios').value.trim());
-  const myAnimeListUrl = escapeHtml(document.getElementById('myAnimeListUrl').value.trim());
-  const animeListUrl = escapeHtml(document.getElementById('animeListUrl').value.trim());
-  const synopsis = escapeHtml(document.getElementById('synopsis').value.trim());
-  const estado = escapeHtml(document.getElementById('estado').value);
-  const duracion = escapeHtml(document.getElementById('duracion').value.trim());
-  const temporadaEstacion = escapeHtml(document.getElementById('temporadaEstacion').value);
-  const temporadaAnio = escapeHtml(document.getElementById('temporadaAnio').value);
-  const tipo = escapeHtml(document.getElementById('tipo').value);
-  const episodios = escapeHtml(document.getElementById('episodios').value.trim());
+async function searchAnime() {
+  const title = document.getElementById('searchTitle').value.trim();
+  if (!title) return alert('Introduce un título');
 
-  // 720p
-  const fansub720 = escapeHtml(document.getElementById('fansub720').value.trim());
-  const subtitulos720 = escapeHtml(document.getElementById('subtitulos720').value.trim());
-  const idioma720 = getSelectedOptions(document.getElementById('idioma720')).join(', ');
-  const encoder720 = escapeHtml(document.getElementById('encoder720').value.trim());
-  const formato720 = escapeHtml(document.getElementById('formato720').value);
-  const resolucion720 = escapeHtml(document.getElementById('resolucion720').value);
-  const comprimido720 = escapeHtml(document.getElementById('comprimido720').value);
-  const calidad720 = escapeHtml(document.getElementById('calidad720').value);
-  const tamano720 = escapeHtml(document.getElementById('tamano720').value.trim());
-  const servidores720 = getSelectedOptions(document.getElementById('servidores720'));
-  const uploader720 = escapeHtml(document.getElementById('uploader720').value.trim());
+  const query = `
+    query ($search: String) {
+      Media(search: $search, type: ANIME) {
+        title {
+          romaji
+          native
+        }
+        coverImage {
+          large
+        }
+        studios { nodes { name } }
+        siteUrl
+        description(asHtml: false)
+        idMal
+      }
+    }
+  `;
 
-  // 1080p
-  const fansub1080 = escapeHtml(document.getElementById('fansub1080').value.trim());
-  const subtitulos1080 = escapeHtml(document.getElementById('subtitulos1080').value.trim());
-  const idioma1080 = getSelectedOptions(document.getElementById('idioma1080')).join(', ');
-  const ripper1080 = escapeHtml(document.getElementById('ripper1080').value.trim());
-  const rawEncode1080 = escapeHtml(document.getElementById('rawEncode1080').value.trim());
-  const muxeo1080 = escapeHtml(document.getElementById('muxeo1080').value.trim());
-  const formato1080 = escapeHtml(document.getElementById('formato1080').value);
-  const resolucion1080 = escapeHtml(document.getElementById('resolucion1080').value);
-  const comprimido1080 = escapeHtml(document.getElementById('comprimido1080').value);
-  const calidad1080 = escapeHtml(document.getElementById('calidad1080').value);
-  const tamano1080 = escapeHtml(document.getElementById('tamano1080').value.trim());
-  const servidores1080 = getSelectedOptions(document.getElementById('servidores1080'));
-  const uploader1080 = escapeHtml(document.getElementById('uploader1080').value);
+  const variables = { search: title };
+  const res = await fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  });
 
-  // Construir servidores con " - "
-  const servidores720Str = joinWithDash(servidores720);
-  const servidores1080Str = joinWithDash(servidores1080);
+  const data = await res.json();
+  const anime = data.data.Media;
+  if (!anime) return alert('No se encontró el anime');
 
-  // Construir HTML completo (con saltos de línea y tabulación para mejor lectura)
-  const html = `
-<main class="anime-main">
-  <section>
-    <div class="notes">
-      <p>[Descarga] ${titleMain}: HDL MP4 - FHD MKV</p>
-    </div>
-  </section>
-  <section class="anime-info">
-    <div class="anime-info__cover">
-      <img src="${coverUrl}" alt="cover">
-    </div>
-    <div class="anime-info__content">
-      <div class="content__titles">
-        <p class="titles--main">${titleMain}</p>
-        <p class="titles--alt">${titleAlt}</p>
-      </div>
-      <div class="content__misc">
-        <div class="misc__studios">
-          <span>${studios}</span>
-        </div>
-        <div class="misc__links">
-          <a href="${myAnimeListUrl}" target="_blank">
-            MyAList
-          </a>
-          <a href="${animeListUrl}" target="_blank">
-            AList
-          </a>
-        </div>
-      </div>
-      <div class="content__synopsis">
-        <h2 class="synopsis__title">SINOPSIS</h2>
-        <p class="synopsis__content">
-          ${synopsis}
-        </p>
-        <!--more-->
-      </div>
-    </div>
-  </section>
-  <div class="content__details">
-    <div class="airing-status">
-      <span><b>ESTADO:</b></span>${estado}
-      <br>
-    </div>
-    <span id="duration">
-      <svg class="i i-clock" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M12 7v5l3 3"></path>
-      </svg>
-      Duración:<br>${duracion}
-    </span>
-    <span class="season">
-      <svg class="i i-calendar" viewBox="0 0 24 24">
-        <rect width="18" height="17" x="3" y="5" rx="2"></rect>
-        <path d="M7 2v3m10-3v3M3 10h18"></path>
-      </svg>
-      Temporada:<br><a href="/search/label/${temporadaAnio}%20${temporadaEstacion}">${temporadaEstacion} ${temporadaAnio}</a>
-    </span>
-    <span id="format">
-      <svg class="i i-tv-retro" viewBox="0 0 24 24">
-        <rect width="20" height="15" x="2" y="7" rx="3"></rect>
-        <path d="m7 2 5 5 5-5"></path>
-      </svg>
-      Tipo:<br>${tipo}
-    </span>
-    <span class="">
-      <svg class="i i-list" viewBox="0 0 24 24">
-        <path d="M7 6h14M7 12h14M7 18h14M3 6h0m0 6h0m0 6h0"></path>
-      </svg>
-      Episodios:<br><b>${episodios}</b>
-    </span>
-  </div>
-  <section class="anime-related">
-   
-  </section>
-  <hr class="break-line">
- <!---Contraseña--->
-<div style="text-align: center;"><b><u>Contraseña:</u></b> 
-  <span id="enlace">animeyseriesdo</span>
-    <button id="copiador" onclick="navigator.clipboard.writeText('animeyseriesdo')"> Copiar <i aria-hidden="true" class="fa fa-files-o"></i>
-</button>
-  </div>
-  <!-----Fin----->
-
-  <section class="tabs-custom">
-    <div class="tab__btns">
-      <button type="button" class="tab__btn" onclick="showPanel(0)">720p HDL</button>
-      <button type="button" class="tab__btn" onclick="showPanel(1)">1080p FHD</button>
-    </div>
-    <div class="tab__panels">
-      <div class="tab__panel" style="display:block;">
-        <table class="tab-custom-table">
-          <tr><th>Fansub:</th><td>${fansub720}</td></tr>
-          <tr><th>Subtítulos:</th><td>${subtitulos720}</td></tr>
-          <tr><th>Idioma (Audio):</th><td>${idioma720}</td></tr>
-          <tr><th>Encoder:</th><td>${encoder720}</td></tr>
-          <tr><th>Formato:</th><td>${formato720}</td></tr>
-          <tr><th>Resolución:</th><td>${resolucion720}</td></tr>
-          <tr><th>Comprimido:</th><td>${comprimido720}</td></tr>
-          <tr><th>Calidad:</th><td>${calidad720}</td></tr>
-          <tr><th>Tamaño por archivo:</th><td>${tamano720}</td></tr>
-          <tr><th>Servidores:</th><td>${servidores720Str}</td></tr>
-          <tr><th>Uploader:</th><td>${uploader720}</td></tr>
-        </table>
-        <div class="custom-detail">
-          <button class="custom-detail__btn" onclick="toggleDetails(this)">Mostrar enlaces: HDL</button>
-          <div class="custom-detail__panel" style="display:none;">
-            <!-- Aquí puedes agregar enlaces si quieres -->
-          </div>
-        </div>
-      </div>
-      <div class="tab__panel" style="display:none;">
-        <table class="tab-custom-table">
-          <tr><th>Fansub:</th><td>${fansub1080}</td></tr>
-          <tr><th>Subtítulos:</th><td>${subtitulos1080}</td></tr>
-          <tr><th>Idioma:</th><td>${idioma1080}</td></tr>
-          <tr><th>Ripper:</th><td>${ripper1080}</td></tr>
-          <tr><th>Raw/Encode:</th><td>${rawEncode1080}</td></tr>
-          <tr><th>Muxeo:</th><td>${muxeo1080}</td></tr>
-          <tr><th>Formato:</th><td>${formato1080}</td></tr>
-          <tr><th>Resolución:</th><td>${resolucion1080}</td></tr>
-          <tr><th>Comprimido:</th><td>${comprimido1080}</td></tr>
-          <tr><th>Calidad:</th><td>${calidad1080}</td></tr>
-          <tr><th>Tamaño por archivo:</th><td>${tamano1080}</td></tr>
-          <tr><th>Servidores:</th><td>${servidores1080Str}</td></tr>
-          <tr><th>Uploader:</th><td>${uploader1080}</td></tr>
-        </table>
-        <div class="custom-detail">
-          <button class="custom-detail__btn" onclick="toggleDetails(this)">Mostrar enlaces: FHD</button>
-          <div class="custom-detail__panel" style="display:none;">
-            <!-- Aquí puedes agregar enlaces si quieres -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="nextEpi"><span><i aria-hidden="true" class="fa fa-info-circle"></i>  <b> Para reportar problemas con la descarga usa los comentarios. </b></span></div>
-  <div style="text-align: center;"><b>¡NO OLVIDES DEJAR UN COMENTARIO!</b></div>
-
-  <section>
-    <div class="anime-tags">
-      <span><a href="/search/label/drama">Drama</a></span>
-      <span><a href="/search/label/histórico">Historia</a></span>
-    </div>
-  </section>
-</main>
-`.trim();
-
-  // Mostrar el HTML generado en el textarea
-  document.getElementById('htmlOutput').textContent = html;
-
-  // Mostrar preview
-  document.getElementById('preview').innerHTML = html;
-
-  // Mostrar la primera pestaña (720p) por defecto
-  showPanel(0);
-};
-
-function showPanel(index) {
-  const panels = document.querySelectorAll('.tab__panel');
-  const buttons = document.querySelectorAll('.tab__btn');
-  panels.forEach((panel, i) => panel.style.display = (i === index) ? 'block' : 'none');
-  buttons.forEach((btn, i) => btn.style.backgroundColor = (i === index) ? '#0066cc' : '#eee');
-  buttons.forEach((btn, i) => btn.style.color = (i === index) ? 'white' : 'black');
+  document.getElementById('animeTitleMain').value = anime.title.romaji || '';
+  document.getElementById('animeTitleAlt').value = anime.title.native || '';
+  document.getElementById('coverUrl').value = anime.coverImage.large || '';
+  document.getElementById('studios').value = anime.studios.nodes.map(s => s.name).join(', ');
+  document.getElementById('animeListUrl').value = anime.siteUrl || '';
+  document.getElementById('myAnimeListUrl').value = anime.idMal ? `https://myanimelist.net/anime/${anime.idMal}` : '';
+  document.getElementById('synopsis').value = await translateToSpanish(anime.description);
 }
 
-function toggleDetails(btn) {
-  const panel = btn.nextElementSibling;
-  if (panel.style.display === 'none') {
-    panel.style.display = 'block';
-    btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Mostrar', 'Ocultar');
-  } else {
-    panel.style.display = 'none';
-    btn.querySelector('.btn__text').textContent = btn.querySelector('.btn__text').textContent.replace('Ocultar', 'Mostrar');
-  }
+async function translateToSpanish(text) {
+  const res = await fetch('https://libretranslate.de/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: text, source: 'en', target: 'es', format: 'text' })
+  });
+  const json = await res.json();
+  return json.translatedText || text;
 }
 </script>
 
