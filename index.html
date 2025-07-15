@@ -1,8 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de Ficha Anime Editable con API</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
+    h1 { text-align: center; }
+    form { max-width: 900px; margin: 0 auto 2rem; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input[type=text], select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    select[multiple] { height: 100px; }
+    .small-input { max-width: 150px; }
+    button { margin-top: 20px; padding: 10px 16px; font-size: 16px; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
+    button:hover { background: #004999; }
+    #htmlOutput { white-space: pre-wrap; background: #222; color: #eee; padding: 10px; border-radius: 6px; overflow-x: auto; max-height: 500px; }
+    .preview-container { max-width: 900px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
+    .note { font-size: 0.9rem; color: #555; margin-top: -10px; }
+    .search-container { display: flex; gap: 10px; align-items: center; }
+    #searchStatus { color: #555; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Generador de Ficha Anime Editable con API</h1>
+
+<form id="animeForm">
+  <label for="animeId">ID de MyAnimeList (ej. 52215 para "Chi.: Chikyuu no Undou ni Tsuite")</label>
+  <div class="search-container">
+    <input type="number" id="animeId" placeholder="Ingresa el ID de MyAnimeList" />
+    <button type="button" id="searchBtn">Buscar Anime</button>
+  </div>
+  <div id="searchStatus"></div>
+
+  <label for="animeTitleMain">Título principal</label>
+  <input type="text" id="animeTitleMain" required value="Chi.: Chikyuu no Undou ni Tsuite" />
+
+  <label for="animeTitleAlt">Título alternativo</label>
+  <input type="text" id="animeTitleAlt" required value="チ。―地球の運動について―" />
+
+  <label for="coverUrl">URL de la portada (imagen)</label>
+  <input type="text" id="coverUrl" required value="https://i.ibb.co/s9z7pf1/Chi-Chikyuu-no-Undou-ni-Tsuite.webp" />
+
+  <label for="studios">Estudio(s)</label>
+  <input type="text" id="studios" required value="Madhouse" />
+
+  <label for="myAnimeListUrl">URL de MyAnimeList</label>
+  <input type="text" id="myAnimeListUrl" value="https://myanimelist.net/anime/52215/Chi__Chikyuu_no_Undou_ni_Tsuite" />
+
+  <label for="animeListUrl">URL de AniList</label>
+  <input type="text" id="animeListUrl" value="https://anilist.co/anime/151514/Chi-Chikyuu-no-Undou-ni-Tsuite/" />
+
+  <label for="synopsis">Sinopsis</label>
+  <textarea id="synopsis" rows="5" required>Polonia del siglo XV, una época en la que las ideas heréticas conducían a quemar en la hoguera a quienes poseían esa mentalidad. Rafał, un niño prodigio, debía especializarse en teología en la universidad, la materia más importante en aquella época. Sin embargo, un día conoce a un hombre misterioso y comienza a investigar una posible "verdad" entre las ideas heréticas.</textarea>
+
+  <label for="estado">Estado</label>
+  <select id="estado" required>
+    <option value="Finalizado" selected>Finalizado</option>
+    <option value="En emisión">En emisión</option>
+  </select>
+
+  <label for="duracion">Duración</label>
+  <input type="text" id="duracion" required value="24min" />
+
+  <label for="temporadaEstacion">Temporada (estación)</label>
+  <select id="temporadaEstacion" required>
+    <option value="Invierno">Invierno</option>
+    <option value="Primavera">Primavera</option>
+    <option value="Verano">Verano</option>
+    <option value="Otoño" selected>Otoño</option>
+  </select>
+
+  <label for="temporadaAnio">Temporada (año)</label>
+  <input type="number" id="temporadaAnio" required min="2000" max="2100" value="2024" />
+
+  <label for="tipo">Tipo</label>
+  <select id="tipo" required>
+    <option value="WEBrip" selected>WEBrip</option>
+    <option value="BD">BD</option>
+  </select>
+
+  <label for="episodios">Episodios (ej. 06/25)</label>
+  <input type="text" id="episodios" required value="06/25" />
+
+  <label><strong>Datos 720p HDL</strong></label>
+
+  <label for="fansub720">Fansub</label>
+  <input type="text" id="fansub720" value="Ninguno (Subs de NF)[Edit NatsuZangetsu]" />
+
+  <label for="subtitulos720">Subtítulos (Español España o Latino)</label>
+  <input type="text" id="subtitulos720" value="Español Neutro" />
+
+  <label for="idioma720">Idioma (Audio) (Selecciona múltiples con Ctrl o Cmd)</label>
+  <select id="idioma720" multiple size="3">
+    <option value="Japonés" selected>Japonés</option>
+    <option value="Latino">Latino</option>
+    <option value="Castellano">Castellano</option>
+  </select>
+
+  <label for="encoder720">Encoder</label>
+  <input type="text" id="encoder720" value="NatsuZangetsu27" />
+
+  <label for="formato720">Formato (siempre MP4 (x264))</label>
+  <input type="text" id="formato720" readonly value="MP4 (x264)" />
+
+  <label for="resolucion720">Resolución (siempre 1280x720)</label>
+  <input type="text" id="resolucion720" readonly value="1280x720" />
+
+  <label for="comprimido720">Comprimido</label>
+  <select id="comprimido720">
+    <option value="Sí" selected>Sí</option>
+    <option value="No">No</option>
+  </select>
+
+  <label for="calidad720">Calidad (siempre Muy buena)</label>
+  <input type="text" id="calidad720" readonly value="Muy buena" />
+
+  <label for="tamano720">Tamaño por archivo</label>
+  <input type="text" id="tamano720" value="132MB" />
+
+  <label for="servidores720">Servidores (selección múltiple)</label>
+  <select id="servidores720" multiple size="5">
+    <option value="Mega" selected>Mega</option>
+    <option value="MediaFire" selected>MediaFire</option>
+    <option value="Google Drive">Google Drive</option>
+    <option value="TeraBox">TeraBox</option>
+    <option value="Index">Index</option>
+  </select>
+
+  <label for="uploader720">Uploader</label>
+  <input type="text" id="uploader720" value="NatsuZangetsu27" />
+
+  <hr />
+
+  <label><strong>Datos 1080p FHD</strong></label>
+
+  <label for="fansub1080">Fansub</label>
+  <input type="text" id="fansub1080" value="Ninguno (Subs de NF)[Edit NatsuZangetsu]" />
+
+  <label for="subtitulos1080">Subtítulos (Español España o Latino)</label>
+  <input type="text" id="subtitulos1080" value="Español" />
+
+  <label for="idioma1080">Idioma (Audio) (Selecciona múltiples con Ctrl o Cmd)</label>
+  <select id="idioma1080" multiple size="3">
+    <option value="Japonés" selected>Japonés</option>
+    <option value="Latino">Latino</option>
+    <option value="Castellano">Castellano</option>
+  </select>
+
+  <label for="ripper1080">Ripper</label>
+  <input type="text" id="ripper1080" value="VARYG" />
+
+  <label for="rawEncode1080">Raw/Encode</label>
+  <input type="text" id="rawEncode1080" value="DKBTeam" />
+
+  <label for="muxeo1080">Muxeo</label>
+  <input type="text" id="muxeo1080" value="NatsuZangetsu27" />
+
+  <label for="formato1080">Formato</label>
+  <select id="formato1080" required>
+    <option value="MKV (x265)" selected>MKV (x265)</option>
+    <option value="MP4 (x264)">MP4 (x264)</option>
+    <option value="MKV (x264)">MKV (x264)</option>
+  </select>
+
+  <label for="resolucion1080">Resolución (siempre 1920x1080)</label>
+  <input type="text" id="resolucion1080" readonly value="1920x1080" />
+
+  <label for="comprimido1080">Comprimido</label>
+  <select id="comprimido1080">
+    <option value="Sí" selected>Sí</option>
+    <option value="No">No</option>
+  </select>
+
+  <label for="calidad1080">Calidad (siempre Excelente)</label>
+  <input type="text" id="calidad1080" readonly value="Excelente" />
+
+  <label for="tamano1080">Tamaño por archivo</label>
+  <input type="text" id="tamano1080" value="220MB aprox~" />
+
+  <label for="servidores1080">Servidores (selección múltiple)</label>
+  <select id="servidores1080" multiple size="5">
+    <option value="Index">Index</option>
+    <option value="Mega">Mega</option>
+    <option value="Google Drive">Google Drive</option>
+    <option value="TeraBox" selected>TeraBox</option>
+    <option value="MediaFire">MediaFire</option>
+  </select>
+
+  <label for="uploader1080">Uploader</label>
+  <select id="uploader1080">
+    <option value="Colla">Colla</option>
+    <option value="NatsuZangetsu27" selected>NatsuZangetsu27</option>
+    <option value="AnimeySeriesdo">AnimeySeriesdo</option>
+    <option value="Nookcir DOM">Nookcir DOM</option>
+  </select>
+
+  <button type="button" id="generateBtn">Generar Código HTML</button>
+</form>
+
+<h2 style="text-align:center;">Código HTML Generado (cópialo y pégalo en Blogger)</h2>
+<pre id="htmlOutput"></pre>
+
+<h2 style="text-align:center;">Vista Previa</h2>
+<div class="preview-container" id="preview"></div>
+
+<script>
+// Función para unir elementos con guion
+function joinWithDash(arr) {
+  return arr.length ? arr.join(' - ') : '';
+}
+
+// Función para unir elementos con coma
+function joinWithComa(arr) {
+  return arr.length ? arr.join(', ') : '';
+}
+
+// Función para escapar caracteres HTML
+function escapeHtml(text) {
+  const map = {
+    '&': '&',
+    '<': '<',
+    '>': '>',
+    '"': '"',
+    "'": '''
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// Función para obtener opciones seleccionadas de un select
+function getSelectedOptions(select) {
+  return Array.from(select.options).filter(o => o.selected).map(o => o.value);
+}
+
+// Función para traducir texto de inglés a español usando Lingva Translate
+async function translateToSpanish(text) {
+  if (!text) return '';
+  try {
+    const response = await fetch(`https://lingva.ml/api/v1/en/es/${encodeURIComponent(text)}`);
+    if (!response.ok) throw new Error('Error en la traducción, status: ' + response.status);
+    const data = await response.json();
+    return data.translation || text; // Lingva devuelve el campo 'translation'
+  } catch (error) {
+    console.error('Error en la traducción:', error);
+    return text; // Devuelve el texto original si falla
+  }
+}
+
+// Función para buscar datos en la API de Jikan y actualizar el formulario
 document.getElementById('searchBtn').onclick = async function() {
   const animeId = document.getElementById('animeId').value.trim();
   const statusElement = document.getElementById('searchStatus');
 
-  console.log('Iniciando búsqueda con ID:', animeId);
+  console.log('Iniciando búsqueda con ID:', animeId); // Depuración
 
   if (!animeId) {
     statusElement.textContent = 'Por favor, ingresa un ID válido de MyAnimeList.';
@@ -14,19 +264,26 @@ document.getElementById('searchBtn').onclick = async function() {
   statusElement.style.color = '#555';
 
   try {
+    // Obtener datos de Jikan
     console.log('Solicitando a Jikan:', `https://api.jikan.moe/v4/anime/${animeId}`);
     const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}`);
-    console.log('Respuesta de Jikan:', response);
-    if (!response.ok) throw new Error('Anime no encontrado en la base de datos, status: ' + response.status);
+    console.log('Respuesta de Jikan:', response); // Depuración
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Límite de solicitudes excedido. Espera 10-15 minutos e intenta de nuevo.');
+      }
+      throw new Error('Anime no encontrado en la base de datos, status: ' + response.status);
+    }
     const data = await response.json();
-    console.log('Datos de Jikan:', data);
+    console.log('Datos de Jikan:', data); // Depuración
     const anime = data.data;
 
     if (!anime) throw new Error('No se encontraron datos del anime');
 
-    // Temporalmente omitir traducción
-    const synopsisTranslated = anime.synopsis || '';
+    // Traducir la sinopsis al español
+    const synopsisTranslated = await translateToSpanish(anime.synopsis || '');
 
+    // Mapeo de datos de la API a los campos del formulario
     document.getElementById('animeTitleMain').value = anime.title || '';
     document.getElementById('animeTitleAlt').value = anime.title_japanese || '';
     document.getElementById('coverUrl').value = anime.images?.jpg?.image_url || '';
@@ -34,6 +291,7 @@ document.getElementById('searchBtn').onclick = async function() {
     document.getElementById('myAnimeListUrl').value = anime.url || '';
     document.getElementById('synopsis').value = synopsisTranslated || '';
 
+    // Mapeo de estado
     const estadoMap = {
       'Finished Airing': 'Finalizado',
       'Currently Airing': 'En emisión',
@@ -41,8 +299,10 @@ document.getElementById('searchBtn').onclick = async function() {
     };
     document.getElementById('estado').value = estadoMap[anime.status] || 'En emisión';
 
+    // Duración
     document.getElementById('duracion').value = anime.duration ? anime.duration.replace(' per ep', '') : '';
 
+    // Temporada
     const temporadaMap = {
       'winter': 'Invierno',
       'spring': 'Primavera',
@@ -52,13 +312,117 @@ document.getElementById('searchBtn').onclick = async function() {
     document.getElementById('temporadaEstacion').value = temporadaMap[anime.season] || 'Otoño';
     document.getElementById('temporadaAnio').value = anime.year || new Date().getFullYear();
 
+    // Episodios (formato "XX/Total")
     document.getElementById('episodios').value = anime.episodes ? `01/${anime.episodes}` : '';
 
-    statusElement.textContent = 'Datos del anime cargados (traducción omitida temporalmente).';
+    statusElement.textContent = 'Datos del anime cargados y sinopsis traducida correctamente.';
     statusElement.style.color = 'green';
   } catch (error) {
-    console.error('Error en la búsqueda:', error);
+    console.error('Error en la búsqueda:', error); // Depuración
     statusElement.textContent = 'Error al cargar los datos: ' + error.message;
     statusElement.style.color = 'red';
   }
 };
+
+// Función para generar el código HTML
+document.getElementById('generateBtn').onclick = function() {
+  const titleMain = escapeHtml(document.getElementById('animeTitleMain').value.trim());
+  const titleAlt = escapeHtml(document.getElementById('animeTitleAlt').value.trim());
+  const coverUrl = escapeHtml(document.getElementById('coverUrl').value.trim());
+  const studios = escapeHtml(document.getElementById('studios').value.trim());
+  const malUrl = escapeHtml(document.getElementById('myAnimeListUrl').value.trim());
+  const anilistUrl = escapeHtml(document.getElementById('animeListUrl').value.trim());
+  const synopsis = escapeHtml(document.getElementById('synopsis').value.trim());
+  const estado = escapeHtml(document.getElementById('estado').value.trim());
+  const duracion = escapeHtml(document.getElementById('duracion').value.trim());
+  const temporadaEstacion = escapeHtml(document.getElementById('temporadaEstacion').value.trim());
+  const temporadaAnio = escapeHtml(document.getElementById('temporadaAnio').value.trim());
+  const tipo = escapeHtml(document.getElementById('tipo').value.trim());
+  const episodios = escapeHtml(document.getElementById('episodios').value.trim());
+
+  // Datos 720p
+  const fansub720 = escapeHtml(document.getElementById('fansub720').value.trim());
+  const subtitulos720 = escapeHtml(document.getElementById('subtitulos720').value.trim());
+  const idioma720 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('idioma720'))));
+  const encoder720 = escapeHtml(document.getElementById('encoder720').value.trim());
+  const formato720 = escapeHtml(document.getElementById('formato720').value.trim());
+  const resolucion720 = escapeHtml(document.getElementById('resolucion720').value.trim());
+  const comprimido720 = escapeHtml(document.getElementById('comprimido720').value.trim());
+  const calidad720 = escapeHtml(document.getElementById('calidad720').value.trim());
+  const tamano720 = escapeHtml(document.getElementById('tamano720').value.trim());
+  const servidores720 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('servidores720'))));
+  const uploader720 = escapeHtml(document.getElementById('uploader720').value.trim());
+
+  // Datos 1080p
+  const fansub1080 = escapeHtml(document.getElementById('fansub1080').value.trim());
+  const subtitulos1080 = escapeHtml(document.getElementById('subtitulos1080').value.trim());
+  const idioma1080 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('idioma1080'))));
+  const ripper1080 = escapeHtml(document.getElementById('ripper1080').value.trim());
+  const rawEncode1080 = escapeHtml(document.getElementById('rawEncode1080').value.trim());
+  const muxeo1080 = escapeHtml(document.getElementById('muxeo1080').value.trim());
+  const formato1080 = escapeHtml(document.getElementById('formato1080').value.trim());
+  const resolucion1080 = escapeHtml(document.getElementById('resolucion1080').value.trim());
+  const comprimido1080 = escapeHtml(document.getElementById('comprimido1080').value.trim());
+  const calidad1080 = escapeHtml(document.getElementById('calidad1080').value.trim());
+  const tamano1080 = escapeHtml(document.getElementById('tamano1080').value.trim());
+  const servidores1080 = escapeHtml(joinWithComa(getSelectedOptions(document.getElementById('servidores1080'))));
+  const uploader1080 = escapeHtml(document.getElementById('uploader1080').value.trim());
+
+  // Generar el código HTML en formato que quieres usar
+  const htmlCode = `
+<!-- FICHA ANIME GENERADA -->
+<div class="ficha-anime">
+  <h2>${titleMain}</h2>
+  <h3>${titleAlt}</h3>
+  <img src="${coverUrl}" alt="Portada de ${titleMain}" style="max-width:200px;" />
+  <p><strong>Estudio(s):</strong> ${studios}</p>
+  <p><strong>Estado:</strong> ${estado}</p>
+  <p><strong>Duración:</strong> ${duracion}</p>
+  <p><strong>Temporada:</strong> ${temporadaEstacion} ${temporadaAnio}</p>
+  <p><strong>Tipo:</strong> ${tipo}</p>
+  <p><strong>Episodios:</strong> ${episodios}</p>
+  <p><strong>Sinopsis:</strong> ${synopsis}</p>
+  <p><a href="${malUrl}" target="_blank" rel="noopener">Ver en MyAnimeList</a> | <a href="${anilistUrl}" target="_blank" rel="noopener">Ver en AniList</a></p>
+
+  <h4>720p HDL</h4>
+  <ul>
+    <li>Fansub: ${fansub720}</li>
+    <li>Subtítulos: ${subtitulos720}</li>
+    <li>Idioma (Audio): ${idioma720}</li>
+    <li>Encoder: ${encoder720}</li>
+    <li>Formato: ${formato720}</li>
+    <li>Resolución: ${resolucion720}</li>
+    <li>Comprimido: ${comprimido720}</li>
+    <li>Calidad: ${calidad720}</li>
+    <li>Tamaño por archivo: ${tamano720}</li>
+    <li>Servidores: ${servidores720}</li>
+    <li>Uploader: ${uploader720}</li>
+  </ul>
+
+  <h4>1080p FHD</h4>
+  <ul>
+    <li>Fansub: ${fansub1080}</li>
+    <li>Subtítulos: ${subtitulos1080}</li>
+    <li>Idioma (Audio): ${idioma1080}</li>
+    <li>Ripper: ${ripper1080}</li>
+    <li>Raw/Encode: ${rawEncode1080}</li>
+    <li>Muxeo: ${muxeo1080}</li>
+    <li>Formato: ${formato1080}</li>
+    <li>Resolución: ${resolucion1080}</li>
+    <li>Comprimido: ${comprimido1080}</li>
+    <li>Calidad: ${calidad1080}</li>
+    <li>Tamaño por archivo: ${tamano1080}</li>
+    <li>Servidores: ${servidores1080}</li>
+    <li>Uploader: ${uploader1080}</li>
+  </ul>
+</div>
+<!-- FIN FICHA ANIME -->
+`;
+
+  document.getElementById('htmlOutput').textContent = htmlCode.trim();
+  document.getElementById('preview').innerHTML = htmlCode.trim();
+};
+</script>
+
+</body>
+</html>
