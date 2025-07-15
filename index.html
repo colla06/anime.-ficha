@@ -6,7 +6,7 @@
     <title>Generador de Ficha Anime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: 'Roboto', sans-serif; }
         input, select, textarea { background-color: #374151; color: #fff; border: 1px solid #4b5563; }
@@ -22,7 +22,19 @@
         <h1 class="text-2xl font-bold text-center mb-6">Generador de Ficha Anime</h1>
         <div class="mb-6">
             <h2 class="text-lg font-semibold mb-2 text-blue-400">Autenticación con Blogger</h2>
-            <div id="authButton"></div>
+            <div id="g_id_onload"
+                 data-client_id="879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="outline"
+                 data-text="sign_in_with"
+                 data-shape="rectangular"
+                 data-logo_alignment="left">
+            </div>
             <p id="authStatus" class="mt-2"></p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
@@ -127,10 +139,10 @@
                     <option value="videojuego">videojuego</option>
                     <option value="yuri">yuri</option>
                     <option value="zombies">zombies</option>
-                    <option value="2025 verano">2025 verano</option>
-                    <option value="2025 otoño">2025 otoño</option>
-                    <option value="2025 invierno">2025 invierno</option>
-                    <option value="2025 primavera">2025 primavera</option>
+                    <option value="2024 verano">2024 verano</option>
+                    <option value="2024 otoño">2024 otoño</option>
+                    <option value="2024 invierno">2024 invierno</option>
+                    <option value="2024 primavera">2024 primavera</option>
                 </select>
             </div>
             <div>
@@ -256,6 +268,7 @@
 
     <script>
         const CLIENT_ID = '879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com';
+        const API_KEY = 'YOUR_API_KEY_HERE'; // Reemplaza con tu API Key de Google Cloud
         const SCOPES = 'https://www.googleapis.com/auth/blogger';
         let tokenClient;
 
@@ -286,6 +299,7 @@
             try {
                 console.log('Inicializando gapi.client...');
                 await gapi.client.init({
+                    apiKey: API_KEY,
                     discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest'],
                 });
                 console.log('gapi.client inicializado con éxito');
@@ -302,27 +316,10 @@
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
                             console.error('Error en la autenticación:', tokenResponse);
-                            showNotice('Error en la autenticación: ' + tokenResponse.error_description, 'error');
+                            showNotice('Error en la autenticación: ' + (tokenResponse.error_description || 'Desconocido'), 'error');
                         }
                     },
                 });
-
-                const buttonDiv = document.getElementById('authButton');
-                buttonDiv.innerHTML = `
-                    <div id="g_id_onload"
-                         data-client_id="${CLIENT_ID}"
-                         data-callback="handleCredentialResponse"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-size="large"
-                         data-theme="outline"
-                         data-text="sign_in_with"
-                         data-shape="rectangular"
-                         data-logo_alignment="left">
-                    </div>
-                `;
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
                 showNotice('Error al inicializar el cliente de Google: ' + error.message, 'error');
@@ -381,7 +378,7 @@
                 const tags = anime.genres?.map(g => g.name.toLowerCase()) || [];
                 if (anime.season && anime.year) {
                     const seasonTag = `${anime.year} ${anime.season.toLowerCase()}`;
-                    if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(seasonTag)) {
+                    if (['2024 verano', '2024 otoño', '2024 invierno', '2024 primavera'].includes(seasonTag)) {
                         tags.push(seasonTag);
                     }
                 }
@@ -433,7 +430,8 @@
                 console.log(`Intentando cargar entrada: Blog ID=${blogId}, Post ID=${postId}`);
                 const response = await gapi.client.blogger.posts.get({
                     blogId: blogId,
-                    postId: postId
+                    postId: postId,
+                    key: API_KEY
                 });
                 console.log('Respuesta de la API:', response);
                 const post = response.result;
@@ -575,12 +573,14 @@
                     response = await gapi.client.blogger.posts.patch({
                         blogId: blogId,
                         postId: postId,
-                        resource: postData
+                        resource: postData,
+                        key: API_KEY
                     });
                 } else {
                     response = await gapi.client.blogger.posts.insert({
                         blogId: blogId,
-                        resource: postData
+                        resource: postData,
+                        key: API_KEY
                     });
                 }
                 showNotice(`Entrada ${postId ? 'actualizada' : 'publicada'} con éxito: ${response.result.url}`, 'success');
