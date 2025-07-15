@@ -6,7 +6,7 @@
     <title>Generador de Ficha Anime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
         body { font-family: 'Roboto', sans-serif; }
         input, select, textarea { background-color: #374151; color: #fff; border: 1px solid #4b5563; }
@@ -22,19 +22,7 @@
         <h1 class="text-2xl font-bold text-center mb-6">Generador de Ficha Anime</h1>
         <div class="mb-6">
             <h2 class="text-lg font-semibold mb-2 text-blue-400">Autenticación con Blogger</h2>
-            <div id="g_id_onload"
-                 data-client_id="879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-size="large"
-                 data-theme="outline"
-                 data-text="sign_in_with"
-                 data-shape="rectangular"
-                 data-logo_alignment="left">
-            </div>
+            <div id="authButton"></div>
             <p id="authStatus" class="mt-2"></p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
@@ -139,10 +127,10 @@
                     <option value="videojuego">videojuego</option>
                     <option value="yuri">yuri</option>
                     <option value="zombies">zombies</option>
-                    <option value="2024 verano">2024 verano</option>
-                    <option value="2024 otoño">2024 otoño</option>
-                    <option value="2024 invierno">2024 invierno</option>
-                    <option value="2024 primavera">2024 primavera</option>
+                    <option value="2025 verano">2025 verano</option>
+                    <option value="2025 otoño">2025 otoño</option>
+                    <option value="2025 invierno">2025 invierno</option>
+                    <option value="2025 primavera">2025 primavera</option>
                 </select>
             </div>
             <div>
@@ -153,7 +141,6 @@
                 <div class="flex gap-4">
                     <label><input type="checkbox" name="subtitulos720" value="Español España"> Español España</label>
                     <label><input type="checkbox" name="subtitulos720" value="Español Latino"> Español Latino</label>
-                    <label><input type="checkbox" name="subtitulos720" value="Español Neutro"> Español Neutro</label>
                 </div>
                 <label for="idioma720" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
                 <select id="idioma720" name="idioma720" multiple class="w-full p-2 rounded h-24">
@@ -197,7 +184,6 @@
                 <div class="flex gap-4">
                     <label><input type="checkbox" name="subtitulos1080" value="Español España"> Español España</label>
                     <label><input type="checkbox" name="subtitulos1080" value="Español Latino"> Español Latino</label>
-                    <label><input type="checkbox" name="subtitulos1080" value="Español"> Español</label>
                 </div>
                 <label for="idioma1080" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
                 <select id="idioma1080" name="idioma1080" multiple class="w-full p-2 rounded h-24">
@@ -243,7 +229,7 @@
                     <option value="AnimeySeriesdo">AnimeySeriesdo</option>
                     <option value="Nookcir DOM">Nookcir DOM</option>
                 </select>
-                <label for="enlaces1080" class="block text-sm mb-1 mt-2">Enlaces 1080p (Pastebin, Index, etc.)</label>
+                <label for="enlaces1080" class="block text-sm mb-1 mt-2">Enlaces 1080p (Pastebin o Index)</label>
                 <input type="text" id="enlaces1080" name="enlaces1080" class="w-full p-2 rounded">
             </div>
             <div class="flex gap-4">
@@ -268,7 +254,6 @@
 
     <script>
         const CLIENT_ID = '879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com';
-        const API_KEY = 'YOUR_API_KEY_HERE'; // Reemplaza con tu API Key de Google Cloud
         const SCOPES = 'https://www.googleapis.com/auth/blogger';
         let tokenClient;
 
@@ -299,14 +284,13 @@
             try {
                 console.log('Inicializando gapi.client...');
                 await gapi.client.init({
-                    apiKey: API_KEY,
                     discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest'],
                 });
                 console.log('gapi.client inicializado con éxito');
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
-                    redirect_uri: 'https://aquamarine-dasik-089aaf.netlify.app/',
+                    redirect_uri: 'https://tu-sitio.netlify.app/',
                     callback: (tokenResponse) => {
                         console.log('Respuesta de autenticación:', tokenResponse);
                         if (tokenResponse.access_token) {
@@ -316,10 +300,27 @@
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
                             console.error('Error en la autenticación:', tokenResponse);
-                            showNotice('Error en la autenticación: ' + (tokenResponse.error_description || 'Desconocido'), 'error');
+                            showNotice('Error en la autenticación: ' + tokenResponse.error_description, 'error');
                         }
                     },
                 });
+
+                const buttonDiv = document.getElementById('authButton');
+                buttonDiv.innerHTML = `
+                    <div id="g_id_onload"
+                         data-client_id="${CLIENT_ID}"
+                         data-callback="handleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-size="large"
+                         data-theme="outline"
+                         data-text="sign_in_with"
+                         data-shape="rectangular"
+                         data-logo_alignment="left">
+                    </div>
+                `;
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
                 showNotice('Error al inicializar el cliente de Google: ' + error.message, 'error');
@@ -378,7 +379,7 @@
                 const tags = anime.genres?.map(g => g.name.toLowerCase()) || [];
                 if (anime.season && anime.year) {
                     const seasonTag = `${anime.year} ${anime.season.toLowerCase()}`;
-                    if (['2024 verano', '2024 otoño', '2024 invierno', '2024 primavera'].includes(seasonTag)) {
+                    if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(seasonTag)) {
                         tags.push(seasonTag);
                     }
                 }
@@ -430,8 +431,7 @@
                 console.log(`Intentando cargar entrada: Blog ID=${blogId}, Post ID=${postId}`);
                 const response = await gapi.client.blogger.posts.get({
                     blogId: blogId,
-                    postId: postId,
-                    key: API_KEY
+                    postId: postId
                 });
                 console.log('Respuesta de la API:', response);
                 const post = response.result;
@@ -449,21 +449,14 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(post.content, 'text/html');
 
-            // Información general
             document.getElementById('tituloPrincipal').value = doc.querySelector('.titles--main')?.textContent || post.title || '';
             document.getElementById('tituloAlternativo').value = doc.querySelector('.titles--alt')?.textContent || '';
             document.getElementById('urlPortada').value = doc.querySelector('.anime-info__cover img')?.src || '';
             document.getElementById('estudio').value = doc.querySelector('.misc__studios span')?.textContent || '';
             document.getElementById('urlMyAnimeList').value = doc.querySelector('.misc__links a[href*="myanimelist.net"]')?.href || '';
             document.getElementById('urlAniList').value = doc.querySelector('.misc__links a[href*="anilist.co"]')?.href || '';
-            document.getElementById('sinopsis').value = doc.querySelector('.synopsis__content')?.textContent.replace('<!--more-->', '').trim() || '';
-
-            // Estado (manejar inputs radio)
-            const estadoValue = doc.querySelector('.airing-status')?.textContent.replace('ESTADO:', '').trim() || 'Finalizado';
-            document.getElementsByName('estado').forEach(radio => {
-                radio.checked = radio.value === estadoValue;
-            });
-
+            document.getElementById('sinopsis').value = doc.querySelector('.synopsis__content')?.textContent.replace('<!--more-->', '') || '';
+            document.getElementById('estado').value = doc.querySelector('.airing-status')?.textContent.replace('ESTADO:', '').trim() || 'Finalizado';
             document.getElementById('duracion').value = doc.querySelector('#duration')?.textContent.replace('Duración:', '').trim() || '';
             const seasonLink = doc.querySelector('.season a')?.href.match(/\/search\/label\/(\d+)%20(\w+)/);
             if (seasonLink) {
@@ -473,24 +466,21 @@
             document.getElementById('tipo').value = doc.querySelector('#format')?.textContent.replace('Tipo:', '').trim() || 'WEBrip';
             document.getElementById('episodios').value = doc.querySelector('.content__details span b')?.textContent || '';
 
-            // Tags (mapear "Historia" a "histórico")
             const tags = Array.from(doc.querySelectorAll('.anime-tags span a')).map(a => {
                 const tagText = a.textContent.toLowerCase();
-                return tagText === 'historia' ? 'histórico' : tagText.replace(/2024 (\w+)/, (match, season) => `2024 ${season.toLowerCase()}`);
+                return tagText.replace(/2025 (\w+)/, (match, season) => `2025 ${season.toLowerCase()}`);
             });
             const selectTags = document.getElementById('tags');
             Array.from(selectTags.options).forEach(option => {
                 option.selected = tags.includes(option.value);
             });
 
-            // 720p HDL
             const table720 = doc.querySelector('.tab__panel#panel--1 .tab-custom-table');
             if (table720) {
                 document.getElementById('fansub720').value = table720.querySelector('tr:nth-child(1) td')?.textContent || '';
                 const subtitulos720 = table720.querySelector('tr:nth-child(2) td')?.textContent.split(', ') || [];
                 document.getElementsByName('subtitulos720').forEach(cb => {
-                    const subValue = subtitulos720[0]?.includes('Español') ? 'Español Neutro' : subtitulos720[0];
-                    cb.checked = subtitulos720.includes(cb.value) || cb.value === subValue;
+                    cb.checked = subtitulos720.includes(cb.value);
                 });
                 const idioma720 = table720.querySelector('tr:nth-child(3) td')?.textContent.split(', ') || [];
                 const selectIdioma720 = document.getElementById('idioma720');
@@ -499,7 +489,7 @@
                 });
                 document.getElementById('encoder720').value = table720.querySelector('tr:nth-child(4) td')?.textContent || '';
                 document.getElementById('tamaño720').value = table720.querySelector('tr:nth-child(9) td')?.textContent || '';
-                const servidores720 = table720.querySelector('tr:nth-child(10) td')?.textContent.split(' - ') || [];
+                const servidores720 = table720.querySelector('tr:nth-child(10) td')?.textContent.split(', ') || [];
                 const selectServidores720 = document.getElementById('servidores720');
                 Array.from(selectServidores720.options).forEach(option => {
                     option.selected = servidores720.includes(option.value);
@@ -508,14 +498,12 @@
                 document.getElementById('enlaces720').value = table720.querySelector('.custom-detail__panel a[href*="pastebin.com"]')?.href || '';
             }
 
-            // 1080p FHD
             const table1080 = doc.querySelector('.tab__panel#panel--2 .tab-custom-table');
             if (table1080) {
                 document.getElementById('fansub1080').value = table1080.querySelector('tr:nth-child(1) td')?.textContent || '';
                 const subtitulos1080 = table1080.querySelector('tr:nth-child(2) td')?.textContent.split(', ') || [];
                 document.getElementsByName('subtitulos1080').forEach(cb => {
-                    const subValue = subtitulos1080[0]?.includes('Español') ? 'Español' : subtitulos1080[0];
-                    cb.checked = subtitulos1080.includes(cb.value) || cb.value === subValue;
+                    cb.checked = subtitulos1080.includes(cb.value);
                 });
                 const idioma1080 = table1080.querySelector('tr:nth-child(3) td')?.textContent.split(', ') || [];
                 const selectIdioma1080 = document.getElementById('idioma1080');
@@ -533,8 +521,7 @@
                     option.selected = servidores1080.includes(option.value);
                 });
                 document.getElementById('uploader1080').value = table1080.querySelector('tr:nth-child(13) td')?.textContent || '';
-                const enlaces1080 = Array.from(table1080.querySelectorAll('.custom-detail__panel a')).map(a => a.href).join(', ');
-                document.getElementById('enlaces1080').value = enlaces1080 || '';
+                document.getElementById('enlaces1080').value = table1080.querySelector('.custom-detail__panel a[href*="pastebin.com"]')?.href || '';
             }
         }
 
@@ -557,7 +544,7 @@
                 title: document.getElementById('tituloPrincipal').value,
                 content: htmlContent,
                 labels: Array.from(document.getElementById('tags').selectedOptions).map(option => {
-                    if (['2024 verano', '2024 otoño', '2024 invierno', '2024 primavera'].includes(option.value)) {
+                    if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(option.value)) {
                         return option.value.replace(/(\d{4}) (\w+)/, (match, year, season) => 
                             `${year} ${season.charAt(0).toUpperCase() + season.slice(1)}`
                         );
@@ -573,14 +560,12 @@
                     response = await gapi.client.blogger.posts.patch({
                         blogId: blogId,
                         postId: postId,
-                        resource: postData,
-                        key: API_KEY
+                        resource: postData
                     });
                 } else {
                     response = await gapi.client.blogger.posts.insert({
                         blogId: blogId,
-                        resource: postData,
-                        key: API_KEY
+                        resource: postData
                     });
                 }
                 showNotice(`Entrada ${postId ? 'actualizada' : 'publicada'} con éxito: ${response.result.url}`, 'success');
@@ -598,13 +583,13 @@
 
             data.subtitulos720 = formData.getAll('subtitulos720').join(', ');
             data.idioma720 = formData.getAll('idioma720').join(', ');
-            data.servidores720 = formData.getAll('servidores720').join(' - ');
+            data.servidores720 = formData.getAll('servidores720').join(', ');
             data.subtitulos1080 = formData.getAll('subtitulos1080').join(', ');
             data.idioma1080 = formData.getAll('idioma1080').join(', ');
             data.servidores1080 = formData.getAll('servidores1080').join(', ');
             data.tags = formData.getAll('tags');
 
-            const seasonTags = ['2024 verano', '2024 otoño', '2024 invierno', '2024 primavera'];
+            const seasonTags = ['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'];
             const tagsHTML = data.tags.map(tag => {
                 if (seasonTags.includes(tag)) {
                     const displayTag = tag.replace(/(\d{4}) (\w+)/, (match, year, season) => 
@@ -614,27 +599,6 @@
                     return `<span><a href="/search/label/${urlTag}">${displayTag}</a></span>`;
                 }
                 return `<span><a href="/search/label/${tag}">${tag}</a></span>`;
-            }).join('\n');
-
-            const enlaces720HTML = data.enlaces720 ? `
-                <a href="${data.enlaces720}" rel="nofollow" target="_blank">
-                    <svg class="i i-download" viewBox="0 0 24 24">
-                        <path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>
-                    </svg>
-                    Paste
-                </a>` : '';
-
-            const enlaces1080HTML = data.enlaces1080.split(', ').map(link => {
-                const isPastebin = link.includes('pastebin.com');
-                return `
-                    <a href="${link}" rel="nofollow" target="_blank">
-                        <svg class="i ${isPastebin ? 'i-download' : 'i-shield'}" viewBox="0 0 24 24">
-                            ${isPastebin ? 
-                                '<path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>' :
-                                '<path d="M12 2 4 5v7q0 6 8 10 8-4 8-10V5Z"></path>'}
-                        </svg>
-                        ${isPastebin ? 'Paste' : 'Index'} ${!isPastebin ? '<svg class="i i-lock" viewBox="0 0 24 24"><path d="M16 10V6a4 4 0 0 0-8 0v4"></path><rect width="18" height="12" x="3" y="10" rx="2"></rect></svg>' : ''}
-                    </a>`;
             }).join('\n');
 
             const htmlContent = `
@@ -701,6 +665,7 @@
             Episodios:<br><b>${data.episodios}</b>
         </span>
     </div>
+    <section class="anime-tags">${tagsHTML}</section>
     <section class="anime-related"></section>
     <hr class="break-line">
     <div style="text-align: center;">
@@ -736,7 +701,12 @@
                         </svg>
                     </button>
                     <div class="custom-detail__panel" id="detail-panel--1">
-                        ${enlaces720HTML}
+                        ${data.enlaces720 ? `<a href="${data.enlaces720}" rel="nofollow" target="_blank">
+                            <svg class="i i-download" viewBox="0 0 24 24">
+                                <path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>
+                            </svg>
+                            Paste
+                        </a>` : ''}
                     </div>
                 </div>
             </div>
@@ -764,17 +734,17 @@
                         </svg>
                     </button>
                     <div class="custom-detail__panel" id="detail-panel--2">
-                        ${enlaces1080HTML}
+                        ${data.enlaces1080 ? `<a href="${data.enlaces1080}" rel="nofollow" target="_blank">
+                            <svg class="i i-download" viewBox="0 0 24 24">
+                                <path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>
+                            </svg>
+                            Paste
+                        </a>` : ''}
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <div class="nextEpi">
-        <span><i aria-hidden="true" class="fa fa-info-circle"></i> <b>Para reportar problemas con la descarga usa los comentarios.</b></span>
-    </div>
-    <div style="text-align: center;"><b>¡NO OLVIDES DEJAR UN COMENTARIO!</b></div>
-    <section class="anime-tags">${tagsHTML}</section>
 </main>
 `;
 
