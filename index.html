@@ -6,19 +6,27 @@
   <title>Generador de Ficha Anime Editable con TMDB API</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
-    h1 { text-align: center; }
+    h1, h2 { text-align: center; color: #333; }
     form { max-width: 900px; margin: 0 auto 2rem; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
-    label { display: block; margin-top: 12px; font-weight: bold; }
-    input[type=text], input[type=number], select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    label { display: block; margin-top: 12px; font-weight: bold; color: #333; }
+    input[type=text], input[type=number], select, textarea { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
     select[multiple] { height: 100px; }
     .small-input { max-width: 150px; }
     button { margin-top: 20px; padding: 10px 16px; font-size: 16px; cursor: pointer; background: #0066cc; color: white; border: none; border-radius: 4px; }
     button:hover { background: #004999; }
-    #htmlOutput { white-space: pre-wrap; background: #222; color: #eee; padding: 10px; border-radius: 6px; overflow-x: auto; max-height: 500px; }
+    #htmlOutput { white-space: pre-wrap; background: #222; color: #eee; padding: 15px; border-radius: 6px; overflow-x: auto; max-height: 500px; font-family: monospace; }
     .preview-container { max-width: 900px; margin: 0 auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
-    .note { font-size: 0.9rem; color: #555; margin-top: -10px; }
     .search-container { display: flex; gap: 10px; align-items: center; }
-    #searchStatus { color: #555; margin-top: 10px; }
+    #searchStatus { color: #555; margin-top: 10px; font-style: italic; }
+    hr { margin: 20px 0; border: 0; border-top: 1px solid #ccc; }
+    .tab__btns { display: flex; gap: 10px; justify-content: center; }
+    .tab__btn { padding: 8px 16px; background: #eee; color: black; border: none; border-radius: 4px; cursor: pointer; }
+    .tab__btn.active { background: #0066cc; color: white; }
+    .tab__panel { margin-top: 10px; }
+    .tab-custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .tab-custom-table th, .tab-custom-table td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    .custom-detail__btn { margin-top: 10px; padding: 8px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .custom-detail__btn:hover { background: #004999; }
   </style>
 </head>
 <body>
@@ -27,33 +35,33 @@
 
 <form id="animeForm">
   <!-- Campo para buscar por ID de TMDB -->
-  <label for="animeId">ID de TMDB (ej. 258374 para "Orb: On the Movements of the Earth")</label>
+  <label for="animeId">ID de TMDB (ej. 95547 para "Sono Bisque Doll wa Koi wo Suru")</label>
   <div class="search-container">
-    <input type="number" id="animeId" placeholder="Ingresa el ID de TMDB" />
+    <input type="number" id="animeId" placeholder="Ingresa el ID de TMDB" min="1" required />
     <button type="button" id="searchBtn">Buscar Anime</button>
   </div>
   <div id="searchStatus"></div>
 
-  <label for="animeTitleMain">Título principal</label>
-  <input type="text" id="animeTitleMain" required value="Chi.: Chikyuu no Undou ni Tsuite" />
+  <label for="animeTitleMain">Título principal (japonés preferido)</label>
+  <input type="text" id="animeTitleMain" required value="Sono Bisque Doll wa Koi wo Suru" />
 
-  <label for="animeTitleAlt">Título alternativo</label>
-  <input type="text" id="animeTitleAlt" required value="チ。―地球の運動について―" />
+  <label for="animeTitleAlt">Título alternativo (español o inglés)</label>
+  <input type="text" id="animeTitleAlt" required value="My Dress-Up Darling" />
 
   <label for="coverUrl">URL de la portada (imagen)</label>
-  <input type="text" id="coverUrl" required value="https://i.ibb.co/s9z7pf1/Chi-Chikyuu-no-Undou-ni-Tsuite.webp" />
+  <input type="text" id="coverUrl" required value="https://image.tmdb.org/t/p/w500/7k6T7Znz3k8k7q9s1iwjnk2jT9y.jpg" />
 
   <label for="studios">Estudio(s)</label>
-  <input type="text" id="studios" required value="Madhouse" />
+  <input type="text" id="studios" required value="CloverWorks" />
 
   <label for="myAnimeListUrl">URL de MyAnimeList</label>
-  <input type="text" id="myAnimeListUrl" value="https://myanimelist.net/anime/52215/Chi__Chikyuu_no_Undou_ni_Tsuite" />
+  <input type="text" id="myAnimeListUrl" value="https://myanimelist.net/anime/48736/Sono_Bisque_Doll_wa_Koi_wo_Suru" />
 
   <label for="animeListUrl">URL de AniList</label>
-  <input type="text" id="animeListUrl" value="https://anilist.co/anime/151514/Chi-Chikyuu-no-Undou-ni-Tsuite/" />
+  <input type="text" id="animeListUrl" value="https://anilist.co/anime/132405/Sono-Bisque-Doll-wa-Koi-wo-Suru/" />
 
   <label for="synopsis">Sinopsis</label>
-  <textarea id="synopsis" rows="5" required>Polonia del siglo XV, una época en la que las ideas heréticas conducían a quemar en la hoguera a quienes poseían esa mentalidad. Rafał, un niño prodigio, debía especializarse en teología en la universidad, la materia más importante en aquella época. Sin embargo, un día conoce a un hombre misterioso y comienza a investigar una posible "verdad" entre las ideas heréticas.</textarea>
+  <textarea id="synopsis" rows="5" required>Marin Kitagawa, una chica popular, se interesa por el cosplay y se une a Wakana Gojo, un tímido estudiante que crea muñecas, para hacer disfraces juntos. A medida que trabajan en equipo, desarrollan una relación especial mientras exploran sus pasiones y personalidades.</textarea>
 
   <label for="estado">Estado</label>
   <select id="estado" required>
@@ -66,14 +74,14 @@
 
   <label for="temporadaEstacion">Temporada (estación)</label>
   <select id="temporadaEstacion" required>
-    <option value="Invierno">Invierno</option>
+    <option value="Invierno" selected>Invierno</option>
     <option value="Primavera">Primavera</option>
     <option value="Verano">Verano</option>
-    <option value="Otoño" selected>Otoño</option>
+    <option value="Otoño">Otoño</option>
   </select>
 
   <label for="temporadaAnio">Temporada (año)</label>
-  <input type="number" id="temporadaAnio" required min="2000" max="2100" value="2024" />
+  <input type="number" id="temporadaAnio" required min="2000" max="2100" value="2022" />
 
   <label for="tipo">Tipo</label>
   <select id="tipo" required>
@@ -81,8 +89,8 @@
     <option value="BD">BD</option>
   </select>
 
-  <label for="episodios">Episodios (ej. 06/25)</label>
-  <input type="text" id="episodios" required value="06/25" />
+  <label for="episodios">Episodios (ej. 01/12)</label>
+  <input type="text" id="episodios" required value="01/12" />
 
   <label><strong>Datos 720p HDL</strong></label>
 
@@ -118,7 +126,7 @@
   <input type="text" id="calidad720" readonly value="Muy buena" />
 
   <label for="tamano720">Tamaño por archivo</label>
-  <input type="text" id="tamano720" value="132MB" />
+  <input type="text" id="tamano720" value="150MB" />
 
   <label for="servidores720">Servidores (selección múltiple)</label>
   <select id="servidores720" multiple size="5">
@@ -178,7 +186,7 @@
   <input type="text" id="calidad1080" readonly value="Excelente" />
 
   <label for="tamano1080">Tamaño por archivo</label>
-  <input type="text" id="tamano1080" value="220MB aprox~" />
+  <input type="text" id="tamano1080" value="250MB aprox~" />
 
   <label for="servidores1080">Servidores (selección múltiple)</label>
   <select id="servidores1080" multiple size="5">
@@ -200,10 +208,10 @@
   <button type="button" id="generateBtn">Generar Código HTML</button>
 </form>
 
-<h2 style="text-align:center;">Código HTML Generado (cópialo y pégalo en Blogger)</h2>
+<h2>Código HTML Generado (cópialo y pégalo en Blogger)</h2>
 <pre id="htmlOutput"></pre>
 
-<h2 style="text-align:center;">Vista Previa</h2>
+<h2>Vista Previa</h2>
 <div class="preview-container" id="preview"></div>
 
 <script>
@@ -213,24 +221,13 @@ const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2ZWQwZDMzZGQ4MTc3MGEwM2RmMmV
 
 // Función para unir elementos con guion
 function joinWithDash(arr) {
-  return arr.length ? arr.join(' - ') : '';
-}
-
-// Función para unir elementos con coma
-function joinWithComa(arr) {
-  return arr.length ? arr.join(', ') : '';
+  return arr.length ? arr.join(' - ') : 'No especificado';
 }
 
 // Función para escapar caracteres HTML
 function escapeHtml(text) {
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  const map = { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' };
+  return text ? text.replace(/[&<>"']/g, m => map[m]) : '';
 }
 
 // Función para obtener opciones seleccionadas de un select
@@ -243,8 +240,8 @@ document.getElementById('searchBtn').onclick = async function() {
   const animeId = document.getElementById('animeId').value.trim();
   const statusElement = document.getElementById('searchStatus');
 
-  if (!animeId) {
-    statusElement.textContent = 'Por favor, ingresa un ID válido de TMDB.';
+  if (!animeId || isNaN(animeId) || animeId <= 0) {
+    statusElement.textContent = 'Por favor, ingresa un ID válido de TMDB (número mayor que 0).';
     statusElement.style.color = 'red';
     return;
   }
@@ -255,25 +252,21 @@ document.getElementById('searchBtn').onclick = async function() {
   try {
     // Obtener detalles del anime
     const detailsResponse = await fetch(`https://api.themoviedb.org/3/tv/${animeId}?api_key=${TMDB_API_KEY}&language=es-ES`, {
-      headers: {
-        'Authorization': `Bearer ${TMDB_TOKEN}`
-      }
+      headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
     });
     if (!detailsResponse.ok) throw new Error('Anime no encontrado en TMDB');
     const anime = await detailsResponse.json();
 
     // Obtener compañías de producción (estudios)
     const companiesResponse = await fetch(`https://api.themoviedb.org/3/tv/${animeId}/credits?api_key=${TMDB_API_KEY}&language=es-ES`, {
-      headers: {
-        'Authorization': `Bearer ${TMDB_TOKEN}`
-      }
+      headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
     });
     const companiesData = await companiesResponse.json();
     const studios = companiesData.production_companies?.map(c => c.name).join(', ') || 'Desconocido';
 
     // Mapeo de datos de TMDB a los campos del formulario
-    document.getElementById('animeTitleMain').value = anime.name || '';
-    document.getElementById('animeTitleAlt').value = anime.original_name || '';
+    document.getElementById('animeTitleMain').value = anime.original_name || anime.name || '';
+    document.getElementById('animeTitleAlt').value = anime.name || anime.original_name || '';
     document.getElementById('coverUrl').value = anime.poster_path ? `https://image.tmdb.org/t/p/w500${anime.poster_path}` : '';
     document.getElementById('studios').value = studios;
     document.getElementById('synopsis').value = anime.overview || 'Sin sinopsis disponible en español. Por favor, ingrésala manualmente.';
@@ -288,7 +281,7 @@ document.getElementById('searchBtn').onclick = async function() {
     document.getElementById('estado').value = estadoMap[anime.status] || 'En emisión';
 
     // Duración
-    document.getElementById('duracion').value = anime.episode_run_time && anime.episode_run_time.length > 0 ? `${anime.episode_run_time[0]}min` : '';
+    document.getElementById('duracion').value = anime.episode_run_time && anime.episode_run_time.length > 0 ? `${anime.episode_run_time[0]}min` : '24min';
 
     // Temporada
     const temporadaMap = {
@@ -302,12 +295,12 @@ document.getElementById('searchBtn').onclick = async function() {
     document.getElementById('temporadaAnio').value = firstAirDate ? firstAirDate.getFullYear() : new Date().getFullYear();
 
     // Episodios
-    document.getElementById('episodios').value = anime.number_of_episodes ? `01/${anime.number_of_episodes}` : '';
+    document.getElementById('episodios').value = anime.number_of_episodes ? `01/${anime.number_of_episodes}` : '01/12';
 
     statusElement.textContent = 'Datos del anime cargados correctamente.';
     statusElement.style.color = 'green';
   } catch (error) {
-    statusElement.textContent = 'Error al cargar los datos: ' + error.message;
+    statusElement.textContent = `Error al cargar los datos: ${error.message}`;
     statusElement.style.color = 'red';
   }
 };
@@ -332,20 +325,20 @@ document.getElementById('generateBtn').onclick = function() {
   // Datos 720p
   const fansub720 = escapeHtml(document.getElementById('fansub720').value.trim());
   const subtitulos720 = escapeHtml(document.getElementById('subtitulos720').value.trim());
-  const idioma720 = getSelectedOptions(document.getElementById('idioma720')).join(', ');
+  const idioma720 = joinWithDash(getSelectedOptions(document.getElementById('idioma720')));
   const encoder720 = escapeHtml(document.getElementById('encoder720').value.trim());
   const formato720 = escapeHtml(document.getElementById('formato720').value);
   const resolucion720 = escapeHtml(document.getElementById('resolucion720').value);
   const comprimido720 = escapeHtml(document.getElementById('comprimido720').value);
   const calidad720 = escapeHtml(document.getElementById('calidad720').value);
   const tamano720 = escapeHtml(document.getElementById('tamano720').value.trim());
-  const servidores720 = getSelectedOptions(document.getElementById('servidores720'));
+  const servidores720 = joinWithDash(getSelectedOptions(document.getElementById('servidores720')));
   const uploader720 = escapeHtml(document.getElementById('uploader720').value.trim());
 
   // Datos 1080p
   const fansub1080 = escapeHtml(document.getElementById('fansub1080').value.trim());
   const subtitulos1080 = escapeHtml(document.getElementById('subtitulos1080').value.trim());
-  const idioma1080 = getSelectedOptions(document.getElementById('idioma1080')).join(', ');
+  const idioma1080 = joinWithDash(getSelectedOptions(document.getElementById('idioma1080')));
   const ripper1080 = escapeHtml(document.getElementById('ripper1080').value.trim());
   const rawEncode1080 = escapeHtml(document.getElementById('rawEncode1080').value.trim());
   const muxeo1080 = escapeHtml(document.getElementById('muxeo1080').value.trim());
@@ -354,12 +347,8 @@ document.getElementById('generateBtn').onclick = function() {
   const comprimido1080 = escapeHtml(document.getElementById('comprimido1080').value);
   const calidad1080 = escapeHtml(document.getElementById('calidad1080').value);
   const tamano1080 = escapeHtml(document.getElementById('tamano1080').value.trim());
-  const servidores1080 = getSelectedOptions(document.getElementById('servidores1080'));
+  const servidores1080 = joinWithDash(getSelectedOptions(document.getElementById('servidores1080')));
   const uploader1080 = escapeHtml(document.getElementById('uploader1080').value);
-
-  // Construir servidores con guiones
-  const servidores720Str = joinWithDash(servidores720);
-  const servidores1080Str = joinWithDash(servidores1080);
 
   // Generar el código HTML
   const html = `
@@ -420,7 +409,7 @@ document.getElementById('generateBtn').onclick = function() {
       </svg>
       Tipo:<br>${tipo}
     </span>
-    <span class="">
+    <span>
       <svg class="i i-list" viewBox="0 0 24 24">
         <path d="M7 6h14M7 12h14M7 18h14M3 6h0m0 6h0m0 6h0"></path>
       </svg>
@@ -435,10 +424,9 @@ document.getElementById('generateBtn').onclick = function() {
     <button id="copiador" onclick="navigator.clipboard.writeText('animeyseriesdo')">Copiar <i aria-hidden="true" class="fa fa-files-o"></i></button>
   </div>
   <!-- Fin Contraseña -->
-
   <section class="tabs-custom">
     <div class="tab__btns">
-      <button type="button" class="tab__btn" onclick="showPanel(0)">720p HDL</button>
+      <button type="button" class="tab__btn active" onclick="showPanel(0)">720p HDL</button>
       <button type="button" class="tab__btn" onclick="showPanel(1)">1080p FHD</button>
     </div>
     <div class="tab__panels">
@@ -453,7 +441,7 @@ document.getElementById('generateBtn').onclick = function() {
           <tr><th>Comprimido:</th><td>${comprimido720}</td></tr>
           <tr><th>Calidad:</th><td>${calidad720}</td></tr>
           <tr><th>Tamaño por archivo:</th><td>${tamano720}</td></tr>
-          <tr><th>Servidores:</th><td>${servidores720Str}</td></tr>
+          <tr><th>Servidores:</th><td>${servidores720}</td></tr>
           <tr><th>Uploader:</th><td>${uploader720}</td></tr>
         </table>
         <div class="custom-detail">
@@ -476,7 +464,7 @@ document.getElementById('generateBtn').onclick = function() {
           <tr><th>Comprimido:</th><td>${comprimido1080}</td></tr>
           <tr><th>Calidad:</th><td>${calidad1080}</td></tr>
           <tr><th>Tamaño por archivo:</th><td>${tamano1080}</td></tr>
-          <tr><th>Servidores:</th><td>${servidores1080Str}</td></tr>
+          <tr><th>Servidores:</th><td>${servidores1080}</td></tr>
           <tr><th>Uploader:</th><td>${uploader1080}</td></tr>
         </table>
         <div class="custom-detail">
@@ -488,16 +476,14 @@ document.getElementById('generateBtn').onclick = function() {
       </div>
     </div>
   </section>
-
   <div class="nextEpi">
     <span><i aria-hidden="true" class="fa fa-info-circle"></i> <b>Para reportar problemas con la descarga, usa los comentarios.</b></span>
   </div>
   <div style="text-align: center;"><b>¡NO OLVIDES DEJAR UN COMENTARIO!</b></div>
-
   <section>
     <div class="anime-tags">
-      <span><a href="/search/label/drama">Drama</a></span>
-      <span><a href="/search/label/histórico">Histórico</a></span>
+      <span><a href="/search/label/romance">Romance</a></span>
+      <span><a href="/search/label/comedia">Comedia</a></span>
     </div>
   </section>
 </main>
@@ -515,21 +501,17 @@ document.getElementById('generateBtn').onclick = function() {
 function showPanel(index) {
   const panels = document.querySelectorAll('.tab__panel');
   const buttons = document.querySelectorAll('.tab__btn');
-  panels.forEach((panel, i) => panel.style.display = (i === index) ? 'block' : 'none');
-  buttons.forEach((btn, i) => btn.style.backgroundColor = (i === index) ? '#0066cc' : '#eee');
-  buttons.forEach((btn, i) => btn.style.color = (i === index) ? 'white' : 'black');
+  panels.forEach((panel, i) => panel.style.display = i === index ? 'block' : 'none');
+  buttons.forEach((btn, i) => {
+    btn.classList.toggle('active', i === index);
+  });
 }
 
 // Función para mostrar u ocultar enlaces
 function toggleDetails(btn) {
   const panel = btn.nextElementSibling;
-  if (panel.style.display === 'none') {
-    panel.style.display = 'block';
-    btn.textContent = btn.textContent.replace('Mostrar', 'Ocultar');
-  } else {
-    panel.style.display = 'none';
-    btn.textContent = btn.textContent.replace('Ocultar', 'Mostrar');
-  }
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  btn.textContent = btn.textContent.includes('Mostrar') ? 'Ocultar enlaces' : 'Mostrar enlaces' + btn.textContent.slice(-3);
 }
 </script>
 
