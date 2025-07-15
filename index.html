@@ -22,7 +22,7 @@
         <h1 class="text-2xl font-bold text-center mb-6">Generador de Ficha Anime</h1>
         <div class="mb-6">
             <h2 class="text-lg font-semibold mb-2 text-blue-400">Autenticación con Blogger</h2>
-            <button id="authButton" class="p-2 rounded">Iniciar sesión con Google</button>
+            <div id="authButton"></div>
             <p id="authStatus" class="mt-2"></p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
@@ -259,7 +259,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Documento cargado, inicializando autenticación...');
-            // Verificar si las bibliotecas de Google están cargadas
             if (typeof gapi === 'undefined') {
                 console.error('Error: gapi no está definido. Verifica la carga de https://apis.google.com/js/api.js');
                 showNotice('Error al cargar la biblioteca de Google API.', 'error');
@@ -271,17 +270,11 @@
                 return;
             }
 
-            // Cargar gapi.client
             gapi.load('client', () => {
                 console.log('gapi.client cargado, inicializando cliente...');
                 initializeGapiClient();
             });
 
-            // Asignar eventos a los botones
-            document.getElementById('authButton').addEventListener('click', () => {
-                console.log('Botón de autenticación clicado');
-                handleAuthClick();
-            });
             document.getElementById('searchButton').addEventListener('click', searchAnime);
             document.getElementById('loadPostButton').addEventListener('click', loadPost);
             document.getElementById('publishButton').addEventListener('click', publishPost);
@@ -297,31 +290,45 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
+                    redirect_uri: 'https://tu-sitio.netlify.app/',
                     callback: (tokenResponse) => {
                         console.log('Respuesta de autenticación:', tokenResponse);
                         if (tokenResponse.access_token) {
                             document.getElementById('authStatus').textContent = 'Autenticado con éxito';
                             document.getElementById('publishButton').disabled = false;
+                            gapi.client.setToken({ access_token: tokenResponse.access_token });
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
                             console.error('Error en la autenticación:', tokenResponse);
-                            showNotice('Error en la autenticación.', 'error');
+                            showNotice('Error en la autenticación: ' + tokenResponse.error_description, 'error');
                         }
                     },
                 });
+
+                const buttonDiv = document.getElementById('authButton');
+                buttonDiv.innerHTML = `
+                    <div id="g_id_onload"
+                         data-client_id="${CLIENT_ID}"
+                         data-callback="handleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-size="large"
+                         data-theme="outline"
+                         data-text="sign_in_with"
+                         data-shape="rectangular"
+                         data-logo_alignment="left">
+                    </div>
+                `;
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
                 showNotice('Error al inicializar el cliente de Google: ' + error.message, 'error');
             }
         }
 
-        function handleAuthClick() {
-            if (!tokenClient) {
-                console.error('tokenClient no está inicializado');
-                showNotice('Error: Cliente de autenticación no inicializado.', 'error');
-                return;
-            }
-            console.log('Solicitando token de acceso...');
+        function handleCredentialResponse(response) {
+            console.log('Respuesta de credenciales recibida:', response);
             tokenClient.requestAccessToken();
         }
 
