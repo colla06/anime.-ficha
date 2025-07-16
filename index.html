@@ -8,269 +8,353 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        body { font-family: 'Roboto', sans-serif; }
-        input, select, textarea { background-color: #374151; color: #fff; border: 1px solid #4b5563; }
-        button { background-color: #2563eb; }
+        body { font-family: 'Roboto', sans-serif; background-color: #1f2937; color: #e5e7eb; }
+        .section-card { background-color: #374151; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .section-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+        input, select, textarea { background-color: #4b5563; color: #fff; border: 1px solid #6b7280; border-radius: 4px; padding: 0.5rem; }
+        button { background-color: #2563eb; color: #fff; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s; }
         button:hover { background-color: #1d4ed8; }
-        .notice { position: fixed; bottom: 1rem; right: 1rem; padding: 0.5rem; border-radius: 0.25rem; color: #fff; }
-        .notice-success { background-color: #2563eb; }
+        .notice { position: fixed; bottom: 1rem; right: 1rem; padding: 0.75rem; border-radius: 0.5rem; color: #fff; z-index: 1000; }
+        .notice-success { background-color: #16a34a; }
         .notice-error { background-color: #dc2626; }
-        .bookmark-btn { padding: 8px 15px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; background-color: #444c5c; color: white; }
+        .bookmark-btn { padding: 8px 15px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; background-color: #4b5563; color: white; }
         .bookmark-btn:hover { background-color: #1a73e8; }
         .bookmark-btn.following, .bookmark-btn.checked { background-color: #2e7d32; }
-        .bookmark-buttons { display: flex; gap: 10px; }
         .video-player-section { background: #2d3748; padding: 15px; border-radius: 8px; }
-        .video-display iframe { width: 100%; height: 400px; }
+        .video-display iframe { width: 100%; height: 400px; border-radius: 8px; }
+        .preview-container { background: #2d3748; padding: 1rem; border-radius: 8px; }
+        .html-output-container textarea { font-family: 'Courier New', monospace; }
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltip-text { visibility: hidden; width: 120px; background-color: #4b5563; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -60px; opacity: 0; transition: opacity 0.3s; }
+        .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 p-4">
-    <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
-        <h1 class="text-2xl font-bold text-center mb-6">Generador de Ficha Anime</h1>
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">Autenticación con Blogger</h2>
-            <button id="authButton" class="p-2 rounded">Iniciar sesión con Google</button>
-            <p id="authStatus" class="mt-2"></p>
-            <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
-            <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
-        </div>
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">Búsqueda por ID (MyAnimeList)</h2>
-            <div class="flex gap-2">
-                <input type="text" id="searchQuery" placeholder="Introduce el ID de MyAnimeList (ej. 52215)" class="flex-1 p-2 rounded">
-                <button id="searchButton" class="p-2 rounded">Buscar</button>
+<body class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-400">Generador de Ficha Anime</h1>
+        
+        <!-- Autenticación -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="text-xl font-semibold text-blue-400">Autenticación con Blogger</h2>
+            </div>
+            <div class="section-content active">
+                <button id="authButton" class="mt-2">Iniciar sesión con Google</button>
+                <p id="authStatus" class="mt-2 text-gray-300"></p>
+                <label for="blogId" class="block text-sm mb-1 mt-4">ID del Blog</label>
+                <input type="text" id="blogId" value="3321190454875664092" class="w-full" readonly>
             </div>
         </div>
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">Editar Entrada Existente</h2>
-            <div class="flex gap-2">
-                <input type="text" id="postId" placeholder="Introduce el ID de la entrada de Blogger" class="flex-1 p-2 rounded">
-                <button id="loadPostButton" class="p-2 rounded">Cargar Entrada</button>
+
+        <!-- Búsqueda -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="text-xl font-semibold text-blue-400">Búsqueda por ID (MyAnimeList)</h2>
+            </div>
+            <div class="section-content active">
+                <div class="flex gap-4">
+                    <input type="text" id="searchQuery" placeholder="Introduce el ID de MyAnimeList (ej. 52215)" class="flex-1">
+                    <button id="searchButton">Buscar</button>
+                </div>
             </div>
         </div>
+
+        <!-- Editar Entrada -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="text-xl font-semibold text-blue-400">Editar Entrada Existente</h2>
+            </div>
+            <div class="section-content active">
+                <div class="flex gap-4">
+                    <input type="text" id="postId" placeholder="Introduce el ID de la entrada de Blogger" class="flex-1">
+                    <button id="loadPostButton">Cargar Entrada</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
         <form id="animeForm" class="space-y-6">
-            <div>
-                <h2 class="text-lg font-semibold mb-2 text-blue-400">Información General</h2>
-                <label for="tituloPrincipal" class="block text-sm mb-1">Título principal</label>
-                <input type="text" id="tituloPrincipal" name="tituloPrincipal" class="w-full p-2 rounded">
-                <label for="tituloAlternativo" class="block text-sm mb-1 mt-2">Título alternativo</label>
-                <input type="text" id="tituloAlternativo" name="tituloAlternativo" class="w-full p-2 rounded">
-                <label for="urlPortada" class="block text-sm mb-1 mt-2">URL de la portada</label>
-                <input type="text" id="urlPortada" name="urlPortada" class="w-full p-2 rounded">
-                <label for="estudio" class="block text-sm mb-1 mt-2">Estudio(s)</label>
-                <input type="text" id="estudio" name="estudio" class="w-full p-2 rounded">
-                <label for="urlMyAnimeList" class="block text-sm mb-1 mt-2">URL MyAnimeList</label>
-                <input type="text" id="urlMyAnimeList" name="urlMyAnimeList" class="w-full p-2 rounded">
-                <label for="urlAniList" class="block text-sm mb-1 mt-2">URL AniList</label>
-                <input type="text" id="urlAniList" name="urlAniList" class="w-full p-2 rounded">
-                <label for="sinopsis" class="block text-sm mb-1 mt-2">Sinopsis</label>
-                <textarea id="sinopsis" name="sinopsis" class="w-full p-2 rounded h-24"></textarea>
-                <label for="estado" class="block text-sm mb-1 mt-2">Estado</label>
-                <div class="flex gap-4">
-                    <label><input type="radio" name="estado" value="Finalizado" checked> Finalizado</label>
-                    <label><input type="radio" name="estado" value="En emisión"> En emisión</label>
-                    <label><input type="radio" name="estado" value="Próximamente"> Próximamente</label>
+            <!-- Información General -->
+            <div class="section-card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2 class="text-xl font-semibold text-blue-400">Información General</h2>
+                    <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-                <label for="proxEpisodio" class="block text-sm mb-1 mt-2">Próximo Episodio</label>
-                <input type="text" id="proxEpisodio" name="proxEpisodio" class="w-full p-2 rounded">
-                <label for="duracion" class="block text-sm mb-1 mt-2">Duración</label>
-                <input type="text" id="duracion" name="duracion" class="w-full p-2 rounded">
-                <label for="temporadaEstacion" class="block text-sm mb-1 mt-2">Temporada (estación)</label>
-                <select id="temporadaEstacion" name="temporadaEstacion" class="w-full p-2 rounded">
-                    <option value="invierno">invierno</option>
-                    <option value="primavera">primavera</option>
-                    <option value="verano">verano</option>
-                    <option value="otoño">otoño</option>
-                </select>
-                <label for="temporadaAño" class="block text-sm mb-1 mt-2">Temporada (año)</label>
-                <input type="text" id="temporadaAño" name="temporadaAño" class="w-full p-2 rounded">
-                <label for="tipo" class="block text-sm mb-1 mt-2">Tipo</label>
-                <div class="flex gap-4">
-                    <label><input type="radio" name="tipo" value="WEBrip"> WEBrip</label>
-                    <label><input type="radio" name="tipo" value="BD"> BD</label>
+                <div class="section-content active">
+                    <label for="tituloPrincipal" class="block text-sm mb-1">Título principal</label>
+                    <input type="text" id="tituloPrincipal" name="tituloPrincipal" class="w-full">
+                    <label for="tituloAlternativo" class="block text-sm mb-1 mt-4">Título alternativo</label>
+                    <input type="text" id="tituloAlternativo" name="tituloAlternativo" class="w-full">
+                    <label for="sinopsis" class="block text-sm mb-1 mt-4">Sinopsis</label>
+                    <textarea id="sinopsis" name="sinopsis" class="w-full h-24"></textarea>
+                    <label for="urlPortada" class="block text-sm mb-1 mt-4">URL de la portada</label>
+                    <input type="text" id="urlPortada" name="urlPortada" class="w-full">
+                    <label for="estudio" class="block text-sm mb-1 mt-4">Estudio(s)</label>
+                    <input type="text" id="estudio" name="estudio" class="w-full">
+                    <label for="urlMyAnimeList" class="block text-sm mb-1 mt-4">URL MyAnimeList</label>
+                    <input type="text" id="urlMyAnimeList" name="urlMyAnimeList" class="w-full">
+                    <label for="urlAniList" class="block text-sm mb-1 mt-4">URL AniList</label>
+                    <input type="text" id="urlAniList" name="urlAniList" class="w-full">
+                    <label for="trailerUrl" class="block text-sm mb-1 mt-4">URL del Trailer</label>
+                    <input type="text" id="trailerUrl" name="trailerUrl" class="w-full">
+                    <label for="estado" class="block text-sm mb-1 mt-4">Estado</label>
+                    <div class="flex gap-4">
+                        <label><input type="radio" name="estado" value="Finalizado" checked> Finalizado</label>
+                        <label><input type="radio" name="estado" value="En emisión"> En emisión</label>
+                        <label><input type="radio" name="estado" value="Próximamente"> Próximamente</label>
+                    </div>
+                    <label for="proxEpisodio" class="block text-sm mb-1 mt-4">Próximo Episodio</label>
+                    <input type="text" id="proxEpisodio" name="proxEpisodio" class="w-full">
+                    <label for="duracion" class="block text-sm mb-1 mt-4">Duración</label>
+                    <input type="text" id="duracion" name="duracion" class="w-full">
+                    <label for="temporadaEstacion" class="block text-sm mb-1 mt-4">Temporada (estación)</label>
+                    <select id="temporadaEstacion" name="temporadaEstacion" class="w-full">
+                        <option value="invierno">Invierno</option>
+                        <option value="primavera">Primavera</option>
+                        <option value="verano">Verano</option>
+                        <option value="otoño">Otoño</option>
+                    </select>
+                    <label for="temporadaAño" class="block text-sm mb-1 mt-4">Temporada (año)</label>
+                    <input type="text" id="temporadaAño" name="temporadaAño" class="w-full">
+                    <label for="tipo" class="block text-sm mb-1 mt-4">Tipo</label>
+                    <div class="flex gap-4">
+                        <label><input type="radio" name="tipo" value="WEBrip"> WEBrip</label>
+                        <label><input type="radio" name="tipo" value="BD"> BD</label>
+                    </div>
+                    <label for="episodios" class="block text-sm mb-1 mt-4">Episodios (ej. 06/25)</label>
+                    <input type="text" id="episodios" name="episodios" class="w-full">
+                    <label for="tags" class="block text-sm mb-1 mt-4">Géneros (selecciona uno o más)</label>
+                    <select id="tags" name="tags" multiple class="w-full h-24">
+                        <option value="acción">Acción</option>
+                        <option value="ángeles">Ángeles</option>
+                        <option value="artes marciales">Artes Marciales</option>
+                        <option value="aventura">Aventura</option>
+                        <option value="comedia">Comedia</option>
+                        <option value="demonios">Demonios</option>
+                        <option value="deporte">Deporte</option>
+                        <option value="drama">Drama</option>
+                        <option value="ecchi">Ecchi</option>
+                        <option value="escolar">Escolar</option>
+                        <option value="fantasía">Fantasía</option>
+                        <option value="ficción">Ficción</option>
+                        <option value="gore">Gore</option>
+                        <option value="guerra">Guerra</option>
+                        <option value="harem">Harem</option>
+                        <option value="histórico">Histórico</option>
+                        <option value="humor negro">Humor Negro</option>
+                        <option value="idols">Idols</option>
+                        <option value="isekai">Isekai</option>
+                        <option value="juegos">Juegos</option>
+                        <option value="magia">Magia</option>
+                        <option value="mecha">Mecha</option>
+                        <option value="militar">Militar</option>
+                        <option value="misterio">Misterio</option>
+                        <option value="música">Música</option>
+                        <option value="parodia">Parodia</option>
+                        <option value="peleas">Peleas</option>
+                        <option value="película">Película</option>
+                        <option value="poderes">Poderes</option>
+                        <option value="psicológico">Psicológico</option>
+                        <option value="recuentos de vida">Recuentos de Vida</option>
+                        <option value="reencarnación">Reencarnación</option>
+                        <option value="romance">Romance</option>
+                        <option value="samurai">Samurai</option>
+                        <option value="seinen">Seinen</option>
+                        <option value="shounen">Shounen</option>
+                        <option value="sobrenatural">Sobrenatural</option>
+                        <option value="suspenso">Suspenso</option>
+                        <option value="terror">Terror</option>
+                        <option value="vampiros">Vampiros</option>
+                        <option value="viaje en el tiempo">Viaje en el Tiempo</option>
+                        <option value="videojuego">Videojuego</option>
+                        <option value="yuri">Yuri</option>
+                        <option value="zombies">Zombies</option>
+                        <option value="2025 verano">2025 Verano</option>
+                        <option value="2025 otoño">2025 Otoño</option>
+                        <option value="2025 invierno">2025 Invierno</option>
+                        <option value="2025 primavera">2025 Primavera</option>
+                    </select>
+                    <label for="videoIframe" class="block text-sm mb-1 mt-4">URL del Reproductor (iframe)</label>
+                    <textarea id="videoIframe" name="videoIframe" class="w-full h-24"></textarea>
+                    <label for="contrasena" class="block text-sm mb-1 mt-4">Contraseña</label>
+                    <input type="text" id="contrasena" name="contrasena" class="w-full" value="animeyseriesdo">
                 </div>
-                <label for="episodios" class="block text-sm mb-1 mt-2">Episodios (ej. 06/25)</label>
-                <input type="text" id="episodios" name="episodios" class="w-full p-2 rounded">
-                <label for="trailerUrl" class="block text-sm mb-1 mt-2">URL del Trailer</label>
-                <input type="text" id="trailerUrl" name="trailerUrl" class="w-full p-2 rounded">
-                <label for="tags" class="block text-sm mb-1 mt-2">Géneros (selecciona uno o más)</label>
-                <select id="tags" name="tags" multiple class="w-full p-2 rounded h-24">
-                    <option value="acción">acción</option>
-                    <option value="ángeles">ángeles</option>
-                    <option value="artes marciales">artes marciales</option>
-                    <option value="aventura">aventura</option>
-                    <option value="comedia">comedia</option>
-                    <option value="demonios">demonios</option>
-                    <option value="deporte">deporte</option>
-                    <option value="drama">drama</option>
-                    <option value="ecchi">ecchi</option>
-                    <option value="escolar">escolar</option>
-                    <option value="fantasía">fantasía</option>
-                    <option value="ficción">ficción</option>
-                    <option value="gore">gore</option>
-                    <option value="guerra">guerra</option>
-                    <option value="harem">harem</option>
-                    <option value="histórico">histórico</option>
-                    <option value="humor negro">humor negro</option>
-                    <option value="idols">idols</option>
-                    <option value="isekai">isekai</option>
-                    <option value="juegos">juegos</option>
-                    <option value="magia">magia</option>
-                    <option value="mecha">mecha</option>
-                    <option value="militar">militar</option>
-                    <option value="misterio">misterio</option>
-                    <option value="música">música</option>
-                    <option value="parodia">parodia</option>
-                    <option value="peleas">peleas</option>
-                    <option value="película">película</option>
-                    <option value="poderes">poderes</option>
-                    <option value="psicológico">psicológico</option>
-                    <option value="recuentos de vida">recuentos de vida</option>
-                    <option value="reencarnación">reencarnación</option>
-                    <option value="romance">romance</option>
-                    <option value="samurai">samurai</option>
-                    <option value="seinen">seinen</option>
-                    <option value="shounen">shounen</option>
-                    <option value="sobrenatural">sobrenatural</option>
-                    <option value="suspenso">suspenso</option>
-                    <option value="terror">terror</option>
-                    <option value="vampiros">vampiros</option>
-                    <option value="viaje en el tiempo">viaje en el tiempo</option>
-                    <option value="videojuego">videojuego</option>
-                    <option value="yuri">yuri</option>
-                    <option value="zombies">zombies</option>
-                    <option value="2025 verano">2025 verano</option>
-                    <option value="2025 otoño">2025 otoño</option>
-                    <option value="2025 invierno">2025 invierno</option>
-                    <option value="2025 primavera">2025 primavera</option>
-                </select>
-                <label for="videoIframe" class="block text-sm mb-1 mt-2">URL del Reproductor (iframe)</label>
-                <textarea id="videoIframe" name="videoIframe" class="w-full p-2 rounded h-24"></textarea>
-                <label for="contrasena" class="block text-sm mb-1 mt-2">Contraseña</label>
-                <input type="text" id="contrasena" name="contrasena" class="w-full p-2 rounded" value="animeyseriesdo">
             </div>
-            <div>
-                <h2 class="text-lg font-semibold mb-2 text-blue-400">Datos 720p HDL</h2>
-                <label for="fansub720" class="block text-sm mb-1">Fansub</label>
-                <input type="text" id="fansub720" name="fansub720" class="w-full p-2 rounded">
-                <label for="subtitulos720" class="block text-sm mb-1 mt-2">Subtítulos</label>
-                <div class="flex gap-4">
-                    <label><input type="checkbox" name="subtitulos720" value="Español España"> Español España</label>
-                    <label><input type="checkbox" name="subtitulos720" value="Español Latino"> Español Latino</label>
+
+            <!-- Datos 720p HDL -->
+            <div class="section-card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2 class="text-xl font-semibold text-blue-400">Datos 720p HDL</h2>
+                    <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-                <label for="idioma720" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
-                <select id="idioma720" name="idioma720" multiple class="w-full p-2 rounded h-24">
-                    <option value="Japonés">Japonés</option>
-                    <option value="Latino">Latino</option>
-                    <option value="Castellano">Castellano</option>
-                </select>
-                <label for="encoder720" class="block text-sm mb-1 mt-2">Encoder</label>
-                <input type="text" id="encoder720" name="encoder720" class="w-full p-2 rounded">
-                <label for="formato720" class="block text-sm mb-1 mt-2">Formato</label>
-                <input type="text" id="formato720" name="formato720" value="MP4 (x264)" readonly class="w-full p-2 rounded">
-                <label for="resolucion720" class="block text-sm mb-1 mt-2">Resolución</label>
-                <input type="text" id="resolucion720" name="resolucion720" value="1280x720" readonly class="w-full p-2 rounded">
-                <label for="comprimido720" class="block text-sm mb-1 mt-2">Comprimido</label>
-                <div class="flex gap-4">
-                    <label><input type="radio" name="comprimido720" value="Sí"> Sí</label>
-                    <label><input type="radio" name="comprimido720" value="No" checked> No</label>
+                <div class="section-content">
+                    <label for="fansub720" class="block text-sm mb-1">Fansub</label>
+                    <input type="text" id="fansub720" name="fansub720" class="w-full">
+                    <label for="subtitulos720" class="block text-sm mb-1 mt-4">Subtítulos</label>
+                    <div class="flex gap-4">
+                        <label><input type="checkbox" name="subtitulos720" value="Español España"> Español España</label>
+                        <label><input type="checkbox" name="subtitulos720" value="Español Latino"> Español Latino</label>
+                    </div>
+                    <label for="idioma720" class="block text-sm mb-1 mt-4">Idioma (Audio)</label>
+                    <select id="idioma720" name="idioma720" multiple class="w-full h-24">
+                        <option value="Japonés">Japonés</option>
+                        <option value="Latino">Latino</option>
+                        <option value="Castellano">Castellano</option>
+                    </select>
+                    <label for="encoder720" class="block text-sm mb-1 mt-4">Encoder</label>
+                    <input type="text" id="encoder720" name="encoder720" class="w-full">
+                    <label for="formato720" class="block text-sm mb-1 mt-4">Formato</label>
+                    <input type="text" id="formato720" name="formato720" value="MP4 (x264)" readonly class="w-full">
+                    <label for="resolucion720" class="block text-sm mb-1 mt-4">Resolución</label>
+                    <input type="text" id="resolucion720" name="resolucion720" value="1280x720" readonly class="w-full">
+                    <label for="comprimido720" class="block text-sm mb-1 mt-4">Comprimido</label>
+                    <div class="flex gap-4">
+                        <label><input type="radio" name="comprimido720" value="Sí"> Sí</label>
+                        <label><input type="radio" name="comprimido720" value="No" checked> No</label>
+                    </div>
+                    <label for="calidad720" class="block text-sm mb-1 mt-4">Calidad</label>
+                    <input type="text" id="calidad720" name="calidad720" value="Muy buena" readonly class="w-full">
+                    <label for="tamaño720" class="block text-sm mb-1 mt-4">Tamaño por archivo</label>
+                    <input type="text" id="tamaño720" name="tamaño720" class="w-full">
+                    <label for="servidores720" class="block text-sm mb-1 mt-4">Servidores</label>
+                    <select id="servidores720" name="servidores720" multiple class="w-full h-24">
+                        <option value="Mega">Mega</option>
+                        <option value="MediaFire">MediaFire</option>
+                        <option value="Google Drive">Google Drive</option>
+                        <option value="TeraBox">TeraBox</option>
+                        <option value="Index">Index</option>
+                    </select>
+                    <label for="uploader720" class="block text-sm mb-1 mt-4">Uploader</label>
+                    <input type="text" id="uploader720" name="uploader720" class="w-full">
+                    <label for="enlaces720" class="block text-sm mb-1 mt-4">Enlaces 720p (Pastebin o Index)</label>
+                    <input type="text" id="enlaces720" name="enlaces720" class="w-full">
                 </div>
-                <label for="calidad720" class="block text-sm mb-1 mt-2">Calidad</label>
-                <input type="text" id="calidad720" name="calidad720" value="Muy buena" readonly class="w-full p-2 rounded">
-                <label for="tamaño720" class="block text-sm mb-1 mt-2">Tamaño por archivo</label>
-                <input type="text" id="tamaño720" name="tamaño720" class="w-full p-2 rounded">
-                <label for="servidores720" class="block text-sm mb-1 mt-2">Servidores</label>
-                <select id="servidores720" name="servidores720" multiple class="w-full p-2 rounded h-24">
-                    <option value="Mega">Mega</option>
-                    <option value="MediaFire">MediaFire</option>
-                    <option value="Google Drive">Google Drive</option>
-                    <option value="TeraBox">TeraBox</option>
-                    <option value="Index">Index</option>
-                </select>
-                <label for="uploader720" class="block text-sm mb-1 mt-2">Uploader</label>
-                <input type="text" id="uploader720" name="uploader720" class="w-full p-2 rounded">
-                <label for="enlaces720" class="block text-sm mb-1 mt-2">Enlaces 720p (Pastebin o Index)</label>
-                <input type="text" id="enlaces720" name="enlaces720" class="w-full p-2 rounded">
             </div>
-            <div>
-                <h2 class="text-lg font-semibold mb-2 text-blue-400">Datos 1080p FHD</h2>
-                <label for="fansub1080" class="block text-sm mb-1">Fansub</label>
-                <input type="text" id="fansub1080" name="fansub1080" class="w-full p-2 rounded">
-                <label for="subtitulos1080" class="block text-sm mb-1 mt-2">Subtítulos</label>
-                <div class="flex gap-4">
-                    <label><input type="checkbox" name="subtitulos1080" value="Español España"> Español España</label>
-                    <label><input type="checkbox" name="subtitulos1080" value="Español Latino"> Español Latino</label>
+
+            <!-- Datos 1080p FHD -->
+            <div class="section-card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2 class="text-xl font-semibold text-blue-400">Datos 1080p FHD</h2>
+                    <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
                 </div>
-                <label for="idioma1080" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
-                <select id="idioma1080" name="idioma1080" multiple class="w-full p-2 rounded h-24">
-                    <option value="Japonés">Japonés</option>
-                    <option value="Latino">Latino</option>
-                    <option value="Castellano">Castellano</option>
-                </select>
-                <label for="ripper1080" class="block text-sm mb-1 mt-2">Ripper</label>
-                <input type="text" id="ripper1080" name="ripper1080" class="w-full p-2 rounded">
-                <label for="rawEncode1080" class="block text-sm mb-1 mt-2">Raw/Encode</label>
-                <input type="text" id="rawEncode1080" name="rawEncode1080" class="w-full p-2 rounded">
-                <label for="muxeo1080" class="block text-sm mb-1 mt-2">Muxeo</label>
-                <input type="text" id="muxeo1080" name="muxeo1080" class="w-full p-2 rounded">
-                <label for="formato1080" class="block text-sm mb-1 mt-2">Formato</label>
-                <select id="formato1080" name="formato1080" class="w-full p-2 rounded">
-                    <option value="MKV (x265)">MKV (x265)</option>
-                    <option value="MP4 (x264)">MP4 (x264)</option>
-                    <option value="MKV (x264)">MKV (x264)</option>
-                </select>
-                <label for="resolucion1080" class="block text-sm mb-1 mt-2">Resolución</label>
-                <input type="text" id="resolucion1080" name="resolucion1080" value="1920x1080" readonly class="w-full p-2 rounded">
-                <label for="comprimido1080" class="block text-sm mb-1 mt-2">Comprimido</label>
-                <div class="flex gap-4">
-                    <label><input type="radio" name="comprimido1080" value="Sí"> Sí</label>
-                    <label><input type="radio" name="comprimido1080" value="No" checked> No</label>
+                <div class="section-content">
+                    <label for="fansub1080" class="block text-sm mb-1">Fansub</label>
+                    <input type="text" id="fansub1080" name="fansub1080" class="w-full">
+                    <label for="subtitulos1080" class="block text-sm mb-1 mt-4">Subtítulos</label>
+                    <div class="flex gap-4">
+                        <label><input type="checkbox" name="subtitulos1080" value="Español España"> Español España</label>
+                        <label><input type="checkbox" name="subtitulos1080" value="Español Latino"> Español Latino</label>
+                    </div>
+                    <label for="idioma1080" class="block text-sm mb-1 mt-4">Idioma (Audio)</label>
+                    <select id="idioma1080" name="idioma1080" multiple class="w-full h-24">
+                        <option value="Japonés">Japonés</option>
+                        <option value="Latino">Latino</option>
+                        <option value="Castellano">Castellano</option>
+                    </select>
+                    <label for="ripper1080" class="block text-sm mb-1 mt-4">Ripper</label>
+                    <input type="text" id="ripper1080" name="ripper1080" class="w-full">
+                    <label for="rawEncode1080" class="block text-sm mb-1 mt-4">Raw/Encode</label>
+                    <input type="text" id="rawEncode1080" name="rawEncode1080" class="w-full">
+                    <label for="muxeo1080" class="block text-sm mb-1 mt-4">Muxeo</label>
+                    <input type="text" id="muxeo1080" name="muxeo1080" class="w-full">
+                    <label for="formato1080" class="block text-sm mb-1 mt-4">Formato</label>
+                    <select id="formato1080" name="formato1080" class="w-full">
+                        <option value="MKV (x265)">MKV (x265)</option>
+                        <option value="MP4 (x264)">MP4 (x264)</option>
+                        <option value="MKV (x264)">MKV (x264)</option>
+                    </select>
+                    <label for="resolucion1080" class="block text-sm mb-1 mt-4">Resolución</label>
+                    <input type="text" id="resolucion1080" name="resolucion1080" value="1920x1080" readonly class="w-full">
+                    <label for="comprimido1080" class="block text-sm mb-1 mt-4">Comprimido</label>
+                    <div class="flex gap-4">
+                        <label><input type="radio" name="comprimido1080" value="Sí"> Sí</label>
+                        <label><input type="radio" name="comprimido1080" value="No" checked> No</label>
+                    </div>
+                    <label for="calidad1080" class="block text-sm mb-1 mt-4">Calidad</label>
+                    <input type="text" id="calidad1080" name="calidad1080" value="Excelente" readonly class="w-full">
+                    <label for="tamaño1080" class="block text-sm mb-1 mt-4">Tamaño por archivo</label>
+                    <input type="text" id="tamaño1080" name="tamaño1080" class="w-full">
+                    <label for="servidores1080" class="block text-sm mb-1 mt-4">Servidores</label>
+                    <select id="servidores1080" name="servidores1080" multiple class="w-full h-24">
+                        <option value="Index">Index</option>
+                        <option value="Mega">Mega</option>
+                        <option value="Google Drive">Google Drive</option>
+                        <option value="TeraBox">TeraBox</option>
+                        <option value="MediaFire">MediaFire</option>
+                    </select>
+                    <label for="uploader1080" class="block text-sm mb-1 mt-4">Uploader</label>
+                    <input type="text" id="uploader1080" name="uploader1080" class="w-full">
+                    <label for="enlaces1080" class="block text-sm mb-1 mt-4">Enlaces 1080p (Pastebin o Index)</label>
+                    <input type="text" id="enlaces1080" name="enlaces1080" class="w-full">
                 </div>
-                <label for="calidad1080" class="block text-sm mb-1 mt-2">Calidad</label>
-                <input type="text" id="calidad1080" name="calidad1080" value="Excelente" readonly class="w-full p-2 rounded">
-                <label for="tamaño1080" class="block text-sm mb-1 mt-2">Tamaño por archivo</label>
-                <input type="text" id="tamaño1080" name="tamaño1080" class="w-full p-2 rounded">
-                <label for="servidores1080" class="block text-sm mb-1 mt-2">Servidores</label>
-                <select id="servidores1080" name="servidores1080" multiple class="w-full p-2 rounded h-24">
-                    <option value="Index">Index</option>
-                    <option value="Mega">Mega</option>
-                    <option value="Google Drive">Google Drive</option>
-                    <option value="TeraBox">TeraBox</option>
-                    <option value="MediaFire">MediaFire</option>
-                </select>
-                <label for="uploader1080" class="block text-sm mb-1 mt-2">Uploader</label>
-                <select id="uploader1080" name="uploader1080" class="w-full p-2 rounded">
-                    <option value="Colla">Colla</option>
-                    <option value="NatsuZangetsu27">NatsuZangetsu27</option>
-                    <option value="AnimeySeriesdo">AnimeySeriesdo</option>
-                    <option value="Nookcir DOM">Nookcir DOM</option>
-                </select>
-                <label for="enlaces1080" class="block text-sm mb-1 mt-2">Enlaces 1080p (Pastebin o Index)</label>
-                <input type="text" id="enlaces1080" name="enlaces1080" class="w-full p-2 rounded">
             </div>
-            <div class="flex gap-4">
-                <button type="button" onclick="generateHTML()" class="p-2 rounded mt-4">Generar HTML</button>
-                <button type="button" id="publishButton" class="p-2 rounded mt-4" disabled>Publicar en Blogger</button>
-                <select id="publishStatus" class="p-2 rounded mt-4">
+
+            <!-- Acciones -->
+            <div class="flex gap-4 flex-wrap">
+                <button type="button" onclick="generateHTML()" class="tooltip">
+                    Generar HTML
+                    <span class="tooltip-text">Genera el código HTML para Blogger</span>
+                </button>
+                <button type="button" id="publishButton" disabled class="tooltip">
+                    Publicar en Blogger
+                    <span class="tooltip-text">Publica directamente en Blogger</span>
+                </button>
+                <select id="publishStatus" class="p-2 rounded">
                     <option value="PUBLISHED">Publicado</option>
                     <option value="DRAFT">Borrador</option>
                 </select>
             </div>
         </form>
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">Vista Previa</h2>
-            <div id="preview" class="bg-gray-700 p-4 rounded"></div>
+
+        <!-- Vista Previa -->
+        <div class="section-card mt-6">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2 class="text-xl font-semibold text-blue-400">Vista Previa</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="section-content active preview-container">
+                <div id="preview"></div>
+            </div>
         </div>
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">HTML Generado</h2>
-            <textarea id="htmlOutput" readonly class="w-full p-2 rounded h-40"></textarea>
-            <button onclick="copyHTML()" class="p-2 rounded mt-2">Copiar HTML</button>
+
+        <!-- HTML Generado -->
+        <div class="section-card mt-6">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2 class="text-xl font-semibold text-blue-400">HTML Generado</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="section-content active html-output-container">
+                <textarea id="htmlOutput" readonly class="w-full h-40"></textarea>
+                <button onclick="copyHTML()" class="mt-2">Copiar HTML</button>
+            </div>
         </div>
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold mb-2 text-blue-400">Probar Botones de Preferencias</h2>
-            <div class="bookmark-buttons">
-                <button class="bookmark-btn" id="btn-follow">👁️ Seguir</button>
-                <button class="bookmark-btn" id="btn-favorite">⭐ Favorito</button>
-                <button class="bookmark-btn" id="btn-plan">📝 En Plan</button>
+
+        <!-- Probar Botones de Preferencias -->
+        <div class="section-card mt-6">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2 class="text-xl font-semibold text-blue-400">Probar Botones de Preferencias</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div class="section-content active">
+                <div class="bookmark-buttons">
+                    <button class="bookmark-btn" id="btn-follow">👁️ Seguir</button>
+                    <button class="bookmark-btn" id="btn-favorite">⭐ Favorito</button>
+                    <button class="bookmark-btn" id="btn-plan">📝 En Plan</button>
+                </div>
             </div>
         </div>
     </div>
@@ -279,6 +363,13 @@
         const CLIENT_ID = '879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com';
         const SCOPES = 'https://www.googleapis.com/auth/blogger';
         let tokenClient;
+
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('svg');
+            content.classList.toggle('active');
+            arrow.classList.toggle('rotate-180');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Documento cargado, inicializando autenticación...');
