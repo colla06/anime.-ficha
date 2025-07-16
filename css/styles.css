@@ -31,7 +31,7 @@ body {
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
-    font-size: 1.1rem; /* Aumentado para mejor legibilidad */
+    font-size: 1.1rem;
     transition: all 0.3s ease;
 }
 
@@ -62,7 +62,7 @@ header {
 }
 
 .section-title {
-    font-size: 2rem; /* Aumentado para mejor visibilidad */
+    font-size: 2rem;
     font-weight: 600;
     background: var(--gradient);
     -webkit-background-clip: text;
@@ -73,7 +73,7 @@ header {
 }
 
 .section-description {
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
     color: var(--text-muted);
     margin-bottom: 1.5rem;
 }
@@ -87,7 +87,7 @@ header {
 }
 
 .label {
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
     font-weight: 500;
     color: var(--text);
     margin-bottom: 0.5rem;
@@ -95,7 +95,7 @@ header {
 
 .floating-label {
     position: relative;
-    margin-bottom: 2rem; /* Aumentado para más espacio */
+    margin-bottom: 2rem;
 }
 
 .floating-label input,
@@ -104,10 +104,10 @@ header {
     background-color: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 1rem; /* Aumentado */
+    padding: 1rem;
     color: var(--text);
     width: 100%;
-    font-size: 1.1rem; /* Aumentado */
+    font-size: 1.1rem;
     transition: all 0.2s ease;
 }
 
@@ -122,7 +122,7 @@ header {
 .floating-label input:not(:placeholder-shown) + label,
 .floating-label textarea:not(:placeholder-shown) + label,
 .floating-label select:not(:placeholder-shown) + label {
-    transform: translateY(-2.75rem) translateX(-0.5rem) scale(0.8); /* Ajustado para texto más grande */
+    transform: translateY(-2.75rem) translateX(-0.5rem) scale(0.8);
     background: var(--card-bg);
     padding: 0 0.5rem;
     color: var(--primary);
@@ -130,9 +130,9 @@ header {
 
 .floating-label label {
     position: absolute;
-    top: 1rem; /* Ajustado */
+    top: 1rem;
     left: 1rem;
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
     color: var(--text-muted);
     transition: all 0.2s ease;
     pointer-events: none;
@@ -146,16 +146,16 @@ header {
 .input-field::placeholder {
     color: var(--text-muted);
     opacity: 0.6;
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
 }
 
 .btn {
     background-color: var(--primary);
     color: white;
-    padding: 1rem 1.75rem; /* Aumentado */
+    padding: 1rem 1.75rem;
     border-radius: 8px;
     font-weight: 500;
-    font-size: 1.1rem; /* Aumentado */
+    font-size: 1.1rem;
     display: inline-flex;
     align-items: center;
     transition: all 0.2s ease;
@@ -185,24 +185,40 @@ header {
 
 .add-option-container {
     display: flex;
-    gap: 0.75rem; /* Aumentado */
+    gap: 0.75rem;
     align-items: center;
     margin-top: 0.75rem;
 }
 
 .add-option-input {
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
+}
+
+.radio-group {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.radio-group .flex {
+    align-items: center;
+}
+
+.radio-group input[type="radio"] {
+    margin-right: 0.5rem;
+    accent-color: var(--primary);
 }
 
 .notice {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    padding: 1.25rem 1.75rem; /* Aumentado */
+    padding: 1.25rem 1.75rem;
     border-radius: 8px;
     color: white;
     font-weight: 500;
-    font-size: 1.1rem; /* Aumentado */
+    font-size: 1.1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     display: flex;
@@ -227,8 +243,8 @@ header {
 }
 
 .bookmark-btn {
-    padding: 1rem 1.75rem; /* Aumentado */
-    font-size: 1.1rem; /* Aumentado */
+    padding: 1rem 1.75rem;
+    font-size: 1.1rem;
     border: none;
     border-radius: 8px;
     background-color: var(--border);
@@ -267,7 +283,7 @@ header {
 
 .html-output-container textarea {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem; /* Aumentado */
+    font-size: 1rem;
     background-color: #1e293b;
     color: #e5e7eb;
     border: none;
@@ -285,9 +301,9 @@ header {
     transform: translateX(-50%);
     background: #1f2937;
     color: white;
-    padding: 0.75rem 1.25rem; /* Aumentado */
+    padding: 0.75rem 1.25rem;
     border-radius: 6px;
-    font-size: 0.9rem; /* Aumentado */
+    font-size: 0.9rem;
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
@@ -315,3 +331,14 @@ footer {
 .section-card.html { border-color: #06b6d4; }
 .section-card.buttons { border-color: #ef4444; }
 .section-card.actions { border-color: #eab308; }
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .section-card.hdl720 .grid,
+    .section-card.fhd1080 .grid {
+        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    }
+    .section-divider.md\:col-span-2 {
+        margin: 1rem 0; /* Menos margen en móviles */
+    }
+}
