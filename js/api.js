@@ -1,10 +1,11 @@
-import { showNotice } from './utils.js';
+import { showNotice, showLoader } from './utils.js';
 import { selectAnime, parsePostContent } from './form.js';
 
 export async function searchAnime() {
     const query = document.getElementById('searchQuery').value.trim();
     if (!query || isNaN(query)) {
         showNotice('Introduce un ID numérico válido de MyAnimeList.', 'error');
+        showLoader(false);
         return;
     }
 
@@ -12,16 +13,20 @@ export async function searchAnime() {
         const response = await fetch(`https://api.jikan.moe/v4/anime/${query}/full`);
         if (response.status === 429) {
             showNotice('Límite de solicitudes alcanzado. Espera un momento.', 'error');
+            showLoader(false);
             return;
         }
         if (!response.ok) {
             showNotice('No se encontró un anime con ese ID.', 'error');
+            showLoader(false);
             return;
         }
         const { data: anime } = await response.json();
-        selectAnime(anime);
+        await selectAnime(anime);
     } catch (error) {
         showNotice('Error al buscar en MyAnimeList: ' + error.message, 'error');
+    } finally {
+        showLoader(false);
     }
 }
 
@@ -30,6 +35,7 @@ export async function loadPost() {
     const postId = document.getElementById('postId').value.trim();
     if (!blogId || !postId) {
         showNotice('Introduce el ID del blog y de la entrada.', 'error');
+        showLoader(false);
         return;
     }
 
@@ -39,6 +45,8 @@ export async function loadPost() {
         showNotice('Entrada cargada correctamente.', 'success');
     } catch (error) {
         showNotice(`Error al cargar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+    } finally {
+        showLoader(false);
     }
 }
 
@@ -50,10 +58,12 @@ export async function publishPost() {
 
     if (!blogId) {
         showNotice('Introduce el ID del blog.', 'error');
+        showLoader(false);
         return;
     }
     if (!htmlContent) {
         showNotice('Genera el HTML primero.', 'error');
+        showLoader(false);
         return;
     }
 
@@ -79,5 +89,7 @@ export async function publishPost() {
         document.getElementById('postId').value = response.result.id;
     } catch (error) {
         showNotice(`Error al publicar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+    } finally {
+        showLoader(false);
     }
 }
