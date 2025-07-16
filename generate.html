@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Generador de HTML para fichas de anime con integración de MyAnimeList">
     <meta name="author" content="Anime Ficha Generator">
-    <meta name="keywords" content="anime, ficha, blogger, myanimelist, generar">
+    <meta name="keywords" content="anime, ficha, myanimelist, generar">
     <title>Generar Ficha Anime</title>
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/000000/anime.png">
     <link href="https://cdn.tailwindcss.com" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
 </head>
 <body class="bg-gray-900 text-gray-100 transition-colors duration-300">
     <header class="fixed top-0 left-0 right-0 bg-gray-800 shadow-lg z-50">
@@ -26,7 +24,6 @@
                 <button id="themeToggle" class="text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-700 transition">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button id="authButton" class="btn btn-primary"><i class="fas fa-sign-in-alt mr-2"></i>Iniciar sesión</button>
             </div>
         </div>
     </header>
@@ -35,28 +32,6 @@
         <div id="loader" class="hidden fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-400"></div>
             <span class="ml-4 text-lg font-medium text-white">Procesando...</span>
-        </div>
-
-        <div id="publishModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full">
-                <h3 class="text-xl font-semibold text-blue-400 mb-4">Confirmar Publicación</h3>
-                <p class="text-gray-300 mb-6">¿Estás seguro de que deseas publicar esta entrada en Blogger como <span id="modalStatus"></span>?</p>
-                <div class="flex justify-end gap-4">
-                    <button id="cancelPublish" class="btn btn-secondary">Cancelar</button>
-                    <button id="confirmPublish" class="btn btn-primary">Confirmar</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-card auth mb-8">
-            <h2 class="section-title"><i class="fas fa-user-lock mr-2"></i>Autenticación</h2>
-            <p class="section-description">Inicia sesión con Google para conectar con Blogger.</p>
-            <hr class="section-divider">
-            <p id="authStatus" class="text-gray-300 mb-4"></p>
-            <div class="floating-label">
-                <input type="text" id="blogId" value="3321190454875664092" class="input-field" readonly>
-                <label for="blogId">ID del Blog</label>
-            </div>
         </div>
 
         <div class="section-card search mb-8">
@@ -455,22 +430,12 @@
 
             <div class="section-card actions">
                 <h2 class="section-title"><i class="fas fa-cogs mr-2"></i>Acciones</h2>
-                <p class="section-description">Genera o publica la ficha del anime.</p>
+                <p class="section-description">Genera el código HTML de la ficha.</p>
                 <hr class="section-divider">
                 <div class="flex gap-4 flex-wrap">
                     <button type="button" onclick="generateHTML()" class="btn btn-primary tooltip" data-tooltip="Genera el código HTML para Blogger">
                         <i class="fas fa-code mr-2"></i>Generar HTML
                     </button>
-                    <button type="button" id="publishButton" disabled class="btn btn-primary tooltip" data-tooltip="Publica directamente en Blogger">
-                        <i class="fas fa-upload mr-2"></i>Publicar
-                    </button>
-                    <div class="floating-label">
-                        <select id="publishStatus" class="input-field p-2">
-                            <option value="PUBLISHED">Publicado</option>
-                            <option value="DRAFT">Borrador</option>
-                        </select>
-                        <label for="publishStatus">Estado de publicación</label>
-                    </div>
                 </div>
             </div>
 
