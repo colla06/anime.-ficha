@@ -1,5 +1,5 @@
 // js/main.js - Generador de Ficha Anime
-// Última actualización: 16 de julio de 2025, 23:22 CEST
+// Última actualización: 16 de julio de 2025, 23:23 CEST
 
 // Función para alternar el tema claro/oscuro
 document.getElementById('themeToggle').addEventListener('click', () => {
@@ -18,8 +18,15 @@ document.getElementById('searchButton').addEventListener('click', async () => {
 
     try {
         const response = await fetch(`https://api.jikan.moe/v4/anime/${searchQuery}`);
-        if (!response.ok) throw new Error('Anime no encontrado');
+        console.log('Respuesta de la API:', response); // Depuración
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText}`);
+        }
         const data = await response.json();
+        console.log('Datos recibidos:', data); // Depuración
+
+        if (!data.data) throw new Error('No se encontraron datos para este ID');
 
         document.getElementById('tituloPrincipal').value = data.data.title || '';
         document.getElementById('tituloAlternativo').value = data.data.titles?.find(t => t.type === 'English')?.title || '';
@@ -39,7 +46,7 @@ document.getElementById('searchButton').addEventListener('click', async () => {
 
     } catch (error) {
         console.error('Error al buscar el anime:', error);
-        alert('No se pudo cargar la información. Verifica el ID o la conexión.');
+        alert(`Error: ${error.message}. Verifica el ID o intenta de nuevo más tarde.`);
     } finally {
         loader.classList.add('hidden');
     }
