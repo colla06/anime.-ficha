@@ -1,68 +1,95 @@
-const ACCESS_TOKEN = 'TU_TOKEN_DE_MYANIMELIST_AQUI'; // Reemplaza con tu token válido
+import { showNotice, showLoader } from './utils.js';
+import { selectAnime, parsePostContent } from './form.js';
 
-async function searchAnime() {
-    const searchQuery = document.getElementById('searchQuery').value.trim();
-    if (!searchQuery) {
-        alert('Por favor, ingresa un ID de MyAnimeList.');
+export async function searchAnime() {
+    const query = document.getElementById('searchQuery').value.trim();
+    if (!query || isNaN(query)) {
+        showNotice('Introduce un ID numérico válido de MyAnimeList.', 'error');
+        showLoader(false);
         return;
     }
 
-    const loader = document.getElementById('loader');
-    loader.classList.remove('hidden');
-
     try {
-        const response = await fetch(`https://api.myanimelist.net/v2/anime/${searchQuery}?fields=id,title,main_picture,synopsis,genres,start_date,end_date,mean,episodes,studios`, {
-            headers: {
-                'Authorization': `Bearer ${ACCESS_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
+        const response = await fetch(`https://api.jikan.moe/v4/anime/${query}/full`);
+        if (response.status === 429) {
+            showNotice('Límite de solicitudes alcanzado. Espera un momento.', 'error');
+            showLoader(false);
+            return;
+        }
         if (!response.ok) {
-            throw new Error(`Error en la API: ${response.status} - ${response.statusText}`);
+            showNotice('No se encontró un anime con ese ID.', 'error');
+            showLoader(false);
+            return;
         }
-
-        const data = await response.json();
-        if (!data || !data.title) {
-            throw new Error('No se encontraron datos para este ID.');
-        }
-
-        // Rellenar el formulario con los datos
-        const tituloPrincipal = document.getElementById('tituloPrincipal');
-        const tituloAlternativo = document.getElementById('tituloAlternativo');
-        const sinopsis = document.getElementById('sinopsis');
-        const urlPortada = document.getElementById('urlPortada');
-        const estudio = document.getElementById('estudio');
-        const urlMyAnimeList = document.getElementById('urlMyAnimeList');
-        const episodios = document.getElementById('episodios');
-        const temporadaAño = document.getElementById('temporadaAño');
-
-        if (tituloPrincipal) tituloPrincipal.value = data.title || '';
-        if (tituloAlternativo) tituloAlternativo.value = data.alternative_titles?.en || '';
-        if (sinopsis) sinopsis.value = data.synopsis || '';
-        if (urlPortada) urlPortada.value = data.main_picture?.large || data.main_picture?.medium || '';
-        if (estudio) estudio.value = data.studios?.map(studio => studio.name).join(', ') || '';
-        if (urlMyAnimeList) urlMyAnimeList.value = `https://myanimelist.net/anime/${data.id}`;
-        if (episodios) episodios.value = data.episodes ? `${data.episodes}` : '';
-        if (temporadaAño) temporadaAño.value = data.start_date ? new Date(data.start_date).getFullYear() : '';
-
-        // Rellenar géneros si existen
-        const tags = document.getElementById('tags');
-        if (tags && data.genres) {
-            const genreValues = data.genres.map(genre => genre.name.toLowerCase());
-            Array.from(tags.options).forEach(option => {
-                option.selected = genreValues.includes(option.value.toLowerCase());
-            });
-        }
-
-        alert('Datos cargados exitosamente.');
+        const { data: anime } = await response.json();
+        await selectAnime(anime);
     } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        alert(`Error al cargar los datos: ${error.message}`);
+        showNotice('Error al buscar en MyAnimeList: ' + error.message, 'error');
     } finally {
-        loader.classList.add('hidden');
+        showLoader(false);
     }
 }
 
-// Asociar el evento al botón de búsqueda
-document.getElementById('searchButton').addEventListener('click', searchAnime);
+export async function loadPost() {
+    const blogId = document.getElementById('blogId').value.trim();
+    const postId = document.getElementById('postId').value.trim();
+    if (!blogId || !postId) {
+        showNotice('Introduce el ID del blog y de la entrada.', 'error');
+        showLoader(false);
+        return;
+    }
+
+    try {
+        const response = await gapi.client.blogger.posts.get({ blogId, postId });
+        parsePostContent(response.result);
+        showNotice('Entrada cargada correctamente.', 'success');
+    } catch (error) {
+        showNotice(`Error al cargar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+    } finally {
+        showLoader(false);
+    }
+}
+
+export async function publishPost() {
+    const blogId = document.getElementById('blogId').value.trim();
+    const postId = document.getElementById('postId').value.trim();
+    const publishStatus = document.getElementById('publishStatus').value;
+    const htmlContent = document.getElementById('htmlOutput').value;
+
+    if (!blogId) {
+        showNotice('Introduce el ID del blog.', 'error');
+        showLoader(false);
+        return;
+    }
+    if (!htmlContent) {
+        showNotice('Genera el HTML primero.', 'error');
+        showLoader(false);
+        return;
+    }
+
+    const postData = {
+        title: document.getElementById('tituloPrincipal').value,
+        content: htmlContent,
+        labels: Array.from(document.getElementById('tags').selectedOptions).map(option => {
+            if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(option.value)) {
+                return option.value.replace(/(\d{4}) (\w+)/, (match, year, season) =>
+                    `${year} ${season.charAt(0).toUpperCase() + season.slice(1)}`
+                );
+            }
+            return option.value;
+        }),
+        status: publishStatus
+    };
+
+    try {
+        const response = postId
+            ? await gapi.client.blogger.posts.patch({ blogId, postId, resource: postData })
+            : await gapi.client.blogger.posts.insert({ blogId, resource: postData });
+        showNotice(`Entrada ${postId ? 'actualizada' : 'publicada'} con éxito: ${response.result.url}`, 'success');
+        document.getElementById('postId').value = response.result.id;
+    } catch (error) {
+        showNotice(`Error al publicar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+    } finally {
+        showLoader(false);
+    }
+}
