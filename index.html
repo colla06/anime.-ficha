@@ -37,8 +37,11 @@
         
         <!-- Autenticación -->
         <div class="section-card">
-            <div class="section-header">
+            <div class="section-header" onclick="toggleSection(this)">
                 <h2 class="text-xl font-semibold text-blue-400">Autenticación con Blogger</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </div>
             <div class="section-content active">
                 <button id="authButton" class="mt-2">Iniciar sesión con Google</button>
@@ -50,8 +53,11 @@
 
         <!-- Búsqueda -->
         <div class="section-card">
-            <div class="section-header">
+            <div class="section-header" onclick="toggleSection(this)">
                 <h2 class="text-xl font-semibold text-blue-400">Búsqueda por ID (MyAnimeList)</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </div>
             <div class="section-content active">
                 <div class="flex gap-4">
@@ -63,8 +69,11 @@
 
         <!-- Editar Entrada -->
         <div class="section-card">
-            <div class="section-header">
+            <div class="section-header" onclick="toggleSection(this)">
                 <h2 class="text-xl font-semibold text-blue-400">Editar Entrada Existente</h2>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </div>
             <div class="section-content active">
                 <div class="flex gap-4">
@@ -349,7 +358,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </div>
-            <div class="section-content active">
+            <div class="section-content">
                 <div class="bookmark-buttons">
                     <button class="bookmark-btn" id="btn-follow">👁️ Seguir</button>
                     <button class="bookmark-btn" id="btn-favorite">⭐ Favorito</button>
@@ -371,6 +380,7 @@
             arrow.classList.toggle('rotate-180');
         }
 
+        // Inicializar secciones colapsadas por defecto
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Documento cargado, inicializando autenticación...');
             if (typeof gapi === 'undefined') {
@@ -383,6 +393,14 @@
                 showNotice('Error al cargar la biblioteca de Google Sign-In.', 'error');
                 return;
             }
+
+            // Inicializar secciones: solo "Información General" y "Vista Previa" abiertas por defecto
+            document.querySelectorAll('.section-content').forEach(content => {
+                if (!content.parentElement.querySelector('h2').textContent.includes('Información General') &&
+                    !content.parentElement.querySelector('h2').textContent.includes('Vista Previa')) {
+                    content.classList.remove('active');
+                }
+            });
 
             gapi.load('client', () => {
                 console.log('gapi.client cargado, inicializando cliente...');
@@ -437,7 +455,8 @@
             if (isInList(keys.plan)) btnPlan.classList.add('checked');
             btnFollow.addEventListener('click', () => {
                 toggleItem(keys.follow, btnFollow, 'following');
-                btnFollow.textContent = btnFollow.classList.contains('following') ? '❌ Dejar de seguir' : '👁️ Seguir';
+                btnFollow.textContent = btnFollow.classList.contains('following') ? '❌ Dejar de seguir littoral
+                seguir' : '👁️ Seguir';
             });
             btnFavorite.addEventListener('click', () => {
                 toggleItem(keys.favorite, btnFavorite, 'checked');
@@ -1094,18 +1113,5 @@ document.getElementById('copiador')?.addEventListener('click', () => {
     }
 });
 </script>
-`;
-
-            document.getElementById('htmlOutput').value = htmlContent;
-            document.getElementById('preview').innerHTML = htmlContent;
-        }
-
-        function copyHTML() {
-            const htmlOutput = document.getElementById('htmlOutput');
-            htmlOutput.select();
-            document.execCommand('copy');
-            showNotice('HTML copiado al portapapeles.', 'success');
-        }
-    </script>
 </body>
 </html>
