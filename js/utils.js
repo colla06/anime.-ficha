@@ -22,7 +22,6 @@ export function initBookmarks() {
             btn.innerHTML = isActive
                 ? btn.innerHTML.replace('Seguir', 'Siguiendo').replace('Favorito', 'Favorited').replace('En Plan', 'Planificado')
                 : btn.innerHTML.replace('Siguiendo', 'Seguir').replace('Favorited', 'Favorito').replace('Planificado', 'En Plan');
-            showNotice(`Estado actualizado: ${btn.textContent}`, 'success');
         });
         const savedState = localStorage.getItem(key) === 'true';
         if (savedState) {
@@ -46,34 +45,10 @@ export function initThemeToggle() {
             ? '<i class="fas fa-moon"></i>'
             : '<i class="fas fa-sun"></i>';
         localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        showNotice(`Modo ${html.classList.contains('dark') ? 'oscuro' : 'claro'} activado`, 'success');
     });
 
     if (localStorage.getItem('theme') === 'light') {
         html.classList.remove('dark');
         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
-}
-
-export function initPublishModal(publishCallback) {
-    const publishButton = document.getElementById('publishButton');
-    const publishModal = document.getElementById('publishModal');
-    const modalStatus = document.getElementById('modalStatus');
-    const cancelPublish = document.getElementById('cancelPublish');
-    const confirmPublish = document.getElementById('confirmPublish');
-    const publishStatus = document.getElementById('publishStatus');
-
-    publishButton.addEventListener('click', () => {
-        modalStatus.textContent = publishStatus.value === 'PUBLISHED' ? 'publicada' : 'borrador';
-        publishModal.classList.remove('hidden');
-    });
-
-    cancelPublish.addEventListener('click', () => {
-        publishModal.classList.add('hidden');
-    });
-
-    confirmPublish.addEventListener('click', () => {
-        publishModal.classList.add('hidden');
-        publishCallback();
-    });
 }
