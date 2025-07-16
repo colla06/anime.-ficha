@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Generador de HTML para fichas de anime con integración de MyAnimeList">
+    <meta name="description" content="Generador de HTML para fichas de anime con integración de Jikan API">
     <meta name="author" content="Anime Ficha Generator">
-    <meta name="keywords" content="anime, ficha, myanimelist, generar">
+    <meta name="keywords" content="anime, ficha, jikan, generar">
+    <meta name="date" content="2025-07-16T23:18:00+02:00">
     <title>Generar Ficha Anime</title>
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/000000/anime.png">
     <link href="https://cdn.tailwindcss.com" rel="stylesheet">
@@ -36,12 +37,12 @@
 
         <div class="section-card search mb-8">
             <h2 class="section-title"><i class="fas fa-search mr-2"></i>Buscar Anime</h2>
-            <p class="section-description">Busca un anime por su ID de MyAnimeList para autocompletar el formulario.</p>
+            <p class="section-description">Busca un anime por su ID de Jikan para autocompletar el formulario.</p>
             <hr class="section-divider">
             <div class="flex gap-4">
                 <div class="floating-label flex-1">
                     <input type="text" id="searchQuery" placeholder=" " class="input-field">
-                    <label for="searchQuery">ID de MyAnimeList (ej. 52215)</label>
+                    <label for="searchQuery">ID de Jikan (ej. 5114)</label>
                 </div>
                 <button id="searchButton" class="btn btn-primary"><i class="fas fa-search mr-2"></i>Buscar</button>
             </div>
@@ -463,7 +464,7 @@
     <footer class="bg-gray-800 py-4">
         <div class="max-w-7xl mx-auto px-4 text-center text-gray-400">
             <p>Generador de Ficha Anime v1.0.0 | Desarrollado por <a href="https://github.com/usuario/anime-ficha-generator" class="text-blue-400 hover:underline">Anime Ficha Generator</a></p>
-            <p class="mt-1">Licencia MIT © 2025</p>
+            <p class="mt-1">Última actualización: 16 de julio de 2025, 23:18 CEST | Licencia MIT © 2025</p>
         </div>
     </footer>
 
