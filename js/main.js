@@ -1,5 +1,5 @@
 // js/main.js - Generador de Ficha Anime
-// Última actualización: 16 de julio de 2025, 23:23 CEST
+// Última actualización: 16 de julio de 2025, 23:26 CEST
 
 // Función para alternar el tema claro/oscuro
 document.getElementById('themeToggle').addEventListener('click', () => {
@@ -9,6 +9,28 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     icon.classList.toggle('fa-sun');
     localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
 });
+
+// Función para traducir texto al español usando LibreTranslate
+async function translateToSpanish(text) {
+    try {
+        const response = await fetch('https://libretranslate.com/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'en', // Asume que el texto original es en inglés
+                target: 'es',
+                format: 'text'
+            })
+        });
+        if (!response.ok) throw new Error('Error en la traducción');
+        const data = await response.json();
+        return data.translatedText;
+    } catch (error) {
+        console.error('Error al traducir:', error);
+        return text; // Devuelve el texto original si falla la traducción
+    }
+}
 
 // Función para buscar y rellenar datos del anime usando Jikan API
 document.getElementById('searchButton').addEventListener('click', async () => {
@@ -28,9 +50,15 @@ document.getElementById('searchButton').addEventListener('click', async () => {
 
         if (!data.data) throw new Error('No se encontraron datos para este ID');
 
+        // Traducir la sinopsis al español
+        let translatedSynopsis = data.data.synopsis || '';
+        if (translatedSynopsis) {
+            translatedSynopsis = await translateToSpanish(translatedSynopsis);
+        }
+
         document.getElementById('tituloPrincipal').value = data.data.title || '';
         document.getElementById('tituloAlternativo').value = data.data.titles?.find(t => t.type === 'English')?.title || '';
-        document.getElementById('sinopsis').value = data.data.synopsis || '';
+        document.getElementById('sinopsis').value = translatedSynopsis;
         document.getElementById('urlPortada').value = data.data.images?.jpg.large_image_url || '';
         document.getElementById('estudio').value = data.data.studios?.map(studio => studio.name).join(', ') || '';
         document.getElementById('urlMyAnimeList').value = data.data.url || '';
