@@ -37,7 +37,7 @@
             </div>
             <button id="manualLoginButton" class="p-2 rounded mt-2 hidden">Iniciar Sesión Manualmente</button>
             <button id="logoutButton" class="p-2 rounded mt-2 hidden">Cerrar Sesión</button>
-            <p id="authStatus" class="mt-2 text-yellow-400"></p>
+            <p id="authStatus" class="mt-2 text-yellow-400">Por favor, inicia sesión con Google para continuar.</p>
             <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
             <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
         </div>
@@ -308,7 +308,7 @@
                 console.log('Cerrando sesión...');
                 google.accounts.id.disableAutoSelect();
                 gapi.client.setToken(null);
-                document.getElementById('authStatus').textContent = 'Sesión cerrada. Inicia sesión nuevamente.';
+                document.getElementById('authStatus').textContent = 'Por favor, inicia sesión con Google para continuar.';
                 document.getElementById('publishButton').disabled = true;
                 document.getElementById('logoutButton').classList.add('hidden');
                 document.getElementById('g_id_signin').classList.remove('hidden');
@@ -337,13 +337,13 @@
                             gapi.client.setToken({ access_token: tokenResponse.access_token });
                             showNotice('Autenticación exitosa.', 'success');
                         } else {
-                            console.error('Error en la autenticación:', tokenResponse);
+                            console.error('Error en la autenticación:', tokenResponse.error || 'No se recibió access_token');
                             document.getElementById('authStatus').textContent = 'Error en la autenticación';
                             showNotice('Error en la autenticación: ' + (tokenResponse.error_description || 'Desconocido'), 'error');
+                            document.getElementById('g_id_signin').classList.remove('hidden');
                         }
                     },
                 });
-                document.getElementById('authStatus').textContent = 'Por favor, inicia sesión con Google.';
             } catch (error) {
                 console.error('Error al inicializar gapi.client:', error);
                 document.getElementById('authStatus').textContent = 'Error al inicializar el cliente';
@@ -361,6 +361,7 @@
                 console.error('No se recibió credencial en la respuesta:', response);
                 document.getElementById('authStatus').textContent = 'Error: No se recibió credencial';
                 showNotice('Error: No se recibió credencial de Google.', 'error');
+                document.getElementById('g_id_signin').classList.remove('hidden');
             }
         }
 
