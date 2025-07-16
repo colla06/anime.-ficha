@@ -3,173 +3,754 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Entradas para Blogger</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        button:hover:not(:disabled) {
-            background-color: #45a049;
-        }
-        #authStatus {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .success { background-color: #dff0d8; color: #3c763d; }
-        .error { background-color: #f2dede; color: #a94442; }
-        .loading { background-color: #d9edf7; color: #31708f; }
-    </style>
+    <title>Generador de Ficha Anime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
+    <style>
+        body { font-family: 'Roboto', sans-serif; }
+        input, select, textarea { background-color: #374151; color: #fff; border: 1px solid #4b5563; }
+        button { background-color: #2563eb; }
+        button:hover { background-color: #1d4ed8; }
+        .notice { position: fixed; bottom: 1rem; right: 1rem; padding: 0.5rem; border-radius: 0.25rem; color: #fff; }
+        .notice-success { background-color: #2563eb; }
+        .notice-error { background-color: #dc2626; }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h2>Generador de Entradas para Blogger</h2>
-        <div id="authButton"></div>
-        <div id="authStatus"></div>
-
-        <label for="postId">ID de la entrada de Blogger (opcional):</label>
-        <input type="text" id="postId" placeholder="Ingresa el ID de la entrada para editar">
-        <button id="loadPostButton" onclick="loadPost()">Cargar Entrada</button>
-
-        <label for="tituloPrincipal">Título Principal:</label>
-        <input type="text" id="tituloPrincipal" placeholder="Ej. [Sub Español] Título del Anime">
-
-        <label for="tituloAlternativo">Título Alternativo:</label>
-        <input type="text" id="tituloAlternativo" placeholder="Ej. Título en japonés o alternativo">
-
-        <label for="sinopsis">Sinopsis:</label>
-        <textarea id="sinopsis" rows="5" placeholder="Descripción del anime..."></textarea>
-
-        <label for="estudio">Estudio:</label>
-        <input type="text" id="estudio" placeholder="Ej. Studio Ghibli">
-
-        <label for="temporada">Temporada:</label>
-        <input type="text" id="temporada" placeholder="Ej. Primavera 2023">
-
-        <label for="enlace720p">Enlace 720p:</label>
-        <input type="text" id="enlace720p" placeholder="URL del enlace 720p">
-
-        <label for="enlace1080p">Enlace 1080p:</label>
-        <input type="text" id="enlace1080p" placeholder="URL del enlace 1080p">
-
-        <label for="etiquetas">Etiquetas (separadas por comas):</label>
-        <input type="text" id="etiquetas" placeholder="Ej. anime, sub español, acción">
-
-        <button id="publishButton" onclick="publishPost()" disabled>Publicar en Blogger</button>
+<body class="bg-gray-900 text-gray-100 p-4">
+    <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-bold text-center mb-6">Generador de Ficha Anime</h1>
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-400">Autenticación con Blogger</h2>
+            <button id="authButton" class="p-2 rounded">Iniciar sesión con Google</button>
+            <p id="authStatus" class="mt-2"></p>
+            <label for="blogId" class="block text-sm mb-1 mt-2">ID del Blog</label>
+            <input type="text" id="blogId" value="3321190454875664092" class="w-full p-2 rounded" readonly>
+        </div>
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-400">Búsqueda por ID (MyAnimeList)</h2>
+            <div class="flex gap-2">
+                <input type="text" id="searchQuery" placeholder="Introduce el ID de MyAnimeList (ej. 52215)" class="flex-1 p-2 rounded">
+                <button id="searchButton" class="p-2 rounded">Buscar</button>
+            </div>
+        </div>
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-400">Editar Entrada Existente</h2>
+            <div class="flex gap-2">
+                <input type="text" id="postId" placeholder="Introduce el ID de la entrada de Blogger" class="flex-1 p-2 rounded">
+                <button id="loadPostButton" class="p-2 rounded">Cargar Entrada</button>
+            </div>
+        </div>
+        <form id="animeForm" class="space-y-6">
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-blue-400">Información General</h2>
+                <label for="tituloPrincipal" class="block text-sm mb-1">Título principal</label>
+                <input type="text" id="tituloPrincipal" name="tituloPrincipal" class="w-full p-2 rounded">
+                <label for="tituloAlternativo" class="block text-sm mb-1 mt-2">Título alternativo</label>
+                <input type="text" id="tituloAlternativo" name="tituloAlternativo" class="w-full p-2 rounded">
+                <label for="urlPortada" class="block text-sm mb-1 mt-2">URL de la portada</label>
+                <input type="text" id="urlPortada" name="urlPortada" class="w-full p-2 rounded">
+                <label for="estudio" class="block text-sm mb-1 mt-2">Estudio(s)</label>
+                <input type="text" id="estudio" name="estudio" class="w-full p-2 rounded">
+                <label for="urlMyAnimeList" class="block text-sm mb-1 mt-2">URL MyAnimeList</label>
+                <input type="text" id="urlMyAnimeList" name="urlMyAnimeList" class="w-full p-2 rounded">
+                <label for="urlAniList" class="block text-sm mb-1 mt-2">URL AniList</label>
+                <input type="text" id="urlAniList" name="urlAniList" class="w-full p-2 rounded">
+                <label for="sinopsis" class="block text-sm mb-1 mt-2">Sinopsis</label>
+                <textarea id="sinopsis" name="sinopsis" class="w-full p-2 rounded h-24"></textarea>
+                <label for="estado" class="block text-sm mb-1 mt-2">Estado</label>
+                <div class="flex gap-4">
+                    <label><input type="radio" name="estado" value="Finalizado" checked> Finalizado</label>
+                    <label><input type="radio" name="estado" value="En emisión"> En emisión</label>
+                </div>
+                <label for="duracion" class="block text-sm mb-1 mt-2">Duración</label>
+                <input type="text" id="duracion" name="duracion" class="w-full p-2 rounded">
+                <label for="temporadaEstacion" class="block text-sm mb-1 mt-2">Temporada (estación)</label>
+                <select id="temporadaEstacion" name="temporadaEstacion" class="w-full p-2 rounded">
+                    <option value="invierno">invierno</option>
+                    <option value="primavera">primavera</option>
+                    <option value="verano">verano</option>
+                    <option value="otoño">otoño</option>
+                </select>
+                <label for="temporadaAño" class="block text-sm mb-1 mt-2">Temporada (año)</label>
+                <input type="text" id="temporadaAño" name="temporadaAño" class="w-full p-2 rounded">
+                <label for="tipo" class="block text-sm mb-1 mt-2">Tipo</label>
+                <div class="flex gap-4">
+                    <label><input type="radio" name="tipo" value="WEBrip"> WEBrip</label>
+                    <label><input type="radio" name="tipo" value="BD"> BD</label>
+                </div>
+                <label for="episodios" class="block text-sm mb-1 mt-2">Episodios (ej. 06/25)</label>
+                <input type="text" id="episodios" name="episodios" class="w-full p-2 rounded">
+                <label for="tags" class="block text-sm mb-1 mt-2">Géneros (selecciona uno o más)</label>
+                <select id="tags" name="tags" multiple class="w-full p-2 rounded h-24">
+                    <option value="acción">acción</option>
+                    <option value="ángeles">ángeles</option>
+                    <option value="artes marciales">artes marciales</option>
+                    <option value="aventura">aventura</option>
+                    <option value="comedia">comedia</option>
+                    <option value="demonios">demonios</option>
+                    <option value="deporte">deporte</option>
+                    <option value="drama">drama</option>
+                    <option value="ecchi">ecchi</option>
+                    <option value="escolar">escolar</option>
+                    <option value="fantasía">fantasía</option>
+                    <option value="ficción">ficción</option>
+                    <option value="gore">gore</option>
+                    <option value="guerra">guerra</option>
+                    <option value="harem">harem</option>
+                    <option value="histórico">histórico</option>
+                    <option value="humor negro">humor negro</option>
+                    <option value="idols">idols</option>
+                    <option value="isekai">isekai</option>
+                    <option value="juegos">juegos</option>
+                    <option value="magia">magia</option>
+                    <option value="mecha">mecha</option>
+                    <option value="militar">militar</option>
+                    <option value="misterio">misterio</option>
+                    <option value="música">música</option>
+                    <option value="parodia">parodia</option>
+                    <option value="peleas">peleas</option>
+                    <option value="película">película</option>
+                    <option value="poderes">poderes</option>
+                    <option value="psicológico">psicológico</option>
+                    <option value="recuentos de vida">recuentos de vida</option>
+                    <option value="reencarnación">reencarnación</option>
+                    <option value="romance">romance</option>
+                    <option value="samurai">samurai</option>
+                    <option value="seinen">seinen</option>
+                    <option value="shounen">shounen</option>
+                    <option value="sobrenatural">sobrenatural</option>
+                    <option value="suspenso">suspenso</option>
+                    <option value="terror">terror</option>
+                    <option value="vampiros">vampiros</option>
+                    <option value="viaje en el tiempo">viaje en el tiempo</option>
+                    <option value="videojuego">videojuego</option>
+                    <option value="yuri">yuri</option>
+                    <option value="zombies">zombies</option>
+                    <option value="2025 verano">2025 verano</option>
+                    <option value="2025 otoño">2025 otoño</option>
+                    <option value="2025 invierno">2025 invierno</option>
+                    <option value="2025 primavera">2025 primavera</option>
+                </select>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-blue-400">Datos 720p HDL</h2>
+                <label for="fansub720" class="block text-sm mb-1">Fansub</label>
+                <input type="text" id="fansub720" name="fansub720" class="w-full p-2 rounded">
+                <label for="subtitulos720" class="block text-sm mb-1 mt-2">Subtítulos</label>
+                <div class="flex gap-4">
+                    <label><input type="checkbox" name="subtitulos720" value="Español España"> Español España</label>
+                    <label><input type="checkbox" name="subtitulos720" value="Español Latino"> Español Latino</label>
+                </div>
+                <label for="idioma720" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
+                <select id="idioma720" name="idioma720" multiple class="w-full p-2 rounded h-24">
+                    <option value="Japonés">Japonés</option>
+                    <option value="Latino">Latino</option>
+                    <option value="Castellano">Castellano</option>
+                </select>
+                <label for="encoder720" class="block text-sm mb-1 mt-2">Encoder</label>
+                <input type="text" id="encoder720" name="encoder720" class="w-full p-2 rounded">
+                <label for="formato720" class="block text-sm mb-1 mt-2">Formato</label>
+                <input type="text" id="formato720" name="formato720" value="MP4 (x264)" readonly class="w-full p-2 rounded">
+                <label for="resolucion720" class="block text-sm mb-1 mt-2">Resolución</label>
+                <input type="text" id="resolucion720" name="resolucion720" value="1280x720" readonly class="w-full p-2 rounded">
+                <label for="comprimido720" class="block text-sm mb-1 mt-2">Comprimido</label>
+                <div class="flex gap-4">
+                    <label><input type="radio" name="comprimido720" value="Sí"> Sí</label>
+                    <label><input type="radio" name="comprimido720" value="No" checked> No</label>
+                </div>
+                <label for="calidad720" class="block text-sm mb-1 mt-2">Calidad</label>
+                <input type="text" id="calidad720" name="calidad720" value="Muy buena" readonly class="w-full p-2 rounded">
+                <label for="tamaño720" class="block text-sm mb-1 mt-2">Tamaño por archivo</label>
+                <input type="text" id="tamaño720" name="tamaño720" class="w-full p-2 rounded">
+                <label for="servidores720" class="block text-sm mb-1 mt-2">Servidores</label>
+                <select id="servidores720" name="servidores720" multiple class="w-full p-2 rounded h-24">
+                    <option value="Mega">Mega</option>
+                    <option value="MediaFire">MediaFire</option>
+                    <option value="Google Drive">Google Drive</option>
+                    <option value="TeraBox">TeraBox</option>
+                    <option value="Index">Index</option>
+                </select>
+                <label for="uploader720" class="block text-sm mb-1 mt-2">Uploader</label>
+                <input type="text" id="uploader720" name="uploader720" class="w-full p-2 rounded">
+                <label for="enlaces720" class="block text-sm mb-1 mt-2">Enlaces 720p (Pastebin o Index)</label>
+                <input type="text" id="enlaces720" name="enlaces720" class="w-full p-2 rounded">
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-blue-400">Datos 1080p FHD</h2>
+                <label for="fansub1080" class="block text-sm mb-1">Fansub</label>
+                <input type="text" id="fansub1080" name="fansub1080" class="w-full p-2 rounded">
+                <label for="subtitulos1080" class="block text-sm mb-1 mt-2">Subtítulos</label>
+                <div class="flex gap-4">
+                    <label><input type="checkbox" name="subtitulos1080" value="Español España"> Español España</label>
+                    <label><input type="checkbox" name="subtitulos1080" value="Español Latino"> Español Latino</label>
+                </div>
+                <label for="idioma1080" class="block text-sm mb-1 mt-2">Idioma (Audio)</label>
+                <select id="idioma1080" name="idioma1080" multiple class="w-full p-2 rounded h-24">
+                    <option value="Japonés">Japonés</option>
+                    <option value="Latino">Latino</option>
+                    <option value="Castellano">Castellano</option>
+                </select>
+                <label for="ripper1080" class="block text-sm mb-1 mt-2">Ripper</label>
+                <input type="text" id="ripper1080" name="ripper1080" class="w-full p-2 rounded">
+                <label for="rawEncode1080" class="block text-sm mb-1 mt-2">Raw/Encode</label>
+                <input type="text" id="rawEncode1080" name="rawEncode1080" class="w-full p-2 rounded">
+                <label for="muxeo1080" class="block text-sm mb-1 mt-2">Muxeo</label>
+                <input type="text" id="muxeo1080" name="muxeo1080" class="w-full p-2 rounded">
+                <label for="formato1080" class="block text-sm mb-1 mt-2">Formato</label>
+                <select id="formato1080" name="formato1080" class="w-full p-2 rounded">
+                    <option value="MKV (x265)">MKV (x265)</option>
+                    <option value="MP4 (x264)">MP4 (x264)</option>
+                    <option value="MKV (x264)">MKV (x264)</option>
+                </select>
+                <label for="resolucion1080" class="block text-sm mb-1 mt-2">Resolución</label>
+                <input type="text" id="resolucion1080" name="resolucion1080" value="1920x1080" readonly class="w-full p-2 rounded">
+                <label for="comprimido1080" class="block text-sm mb-1 mt-2">Comprimido</label>
+                <div class="flex gap-4">
+                    <label><input type="radio" name="comprimido1080" value="Sí"> Sí</label>
+                    <label><input type="radio" name="comprimido1080" value="No" checked> No</label>
+                </div>
+                <label for="calidad1080" class="block text-sm mb-1 mt-2">Calidad</label>
+                <input type="text" id="calidad1080" name="calidad1080" value="Excelente" readonly class="w-full p-2 rounded">
+                <label for="tamaño1080" class="block text-sm mb-1 mt-2">Tamaño por archivo</label>
+                <input type="text" id="tamaño1080" name="tamaño1080" class="w-full p-2 rounded">
+                <label for="servidores1080" class="block text-sm mb-1 mt-2">Servidores</label>
+                <select id="servidores1080" name="servidores1080" multiple class="w-full p-2 rounded h-24">
+                    <option value="Index">Index</option>
+                    <option value="Mega">Mega</option>
+                    <option value="Google Drive">Google Drive</option>
+                    <option value="TeraBox">TeraBox</option>
+                    <option value="MediaFire">MediaFire</option>
+                </select>
+                <label for="uploader1080" class="block text-sm mb-1 mt-2">Uploader</label>
+                <select id="uploader1080" name="uploader1080" class="w-full p-2 rounded">
+                    <option value="Colla">Colla</option>
+                    <option value="NatsuZangetsu27">NatsuZangetsu27</option>
+                    <option value="AnimeySeriesdo">AnimeySeriesdo</option>
+                    <option value="Nookcir DOM">Nookcir DOM</option>
+                </select>
+                <label for="enlaces1080" class="block text-sm mb-1 mt-2">Enlaces 1080p (Pastebin o Index)</label>
+                <input type="text" id="enlaces1080" name="enlaces1080" class="w-full p-2 rounded">
+            </div>
+            <div class="flex gap-4">
+                <button type="button" onclick="generateHTML()" class="p-2 rounded mt-4">Generar HTML</button>
+                <button type="button" id="publishButton" class="p-2 rounded mt-4" disabled>Publicar en Blogger</button>
+                <select id="publishStatus" class="p-2 rounded mt-4">
+                    <option value="PUBLISHED">Publicado</option>
+                    <option value="DRAFT">Borrador</option>
+                </select>
+            </div>
+        </form>
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-400">Vista Previa</h2>
+            <div id="preview" class="bg-gray-700 p-4 rounded"></div>
+        </div>
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-2 text-blue-400">HTML Generado</h2>
+            <textarea id="htmlOutput" readonly class="w-full p-2 rounded h-40"></textarea>
+            <button onclick="copyHTML()" class="p-2 rounded mt-2">Copiar HTML</button>
+        </div>
     </div>
 
     <script>
         const CLIENT_ID = '879567119064-pglj8dsqnka2sfpgh6hu50b723f1viia.apps.googleusercontent.com';
-        const API_KEY = 'AIzaSyB-DM3G0Y8xTqXKOI5jX0bF4G8hL6e0mZQ';
-        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest"];
         const SCOPES = 'https://www.googleapis.com/auth/blogger';
-        const BLOG_ID = '3321190454875664092';
-
         let tokenClient;
-        let accessToken = null;
 
-        function updateAuthStatus(message, className) {
-            const statusDiv = document.getElementById('authStatus');
-            statusDiv.textContent = message;
-            statusDiv.className = className;
-        }
-
-        function initializeAuth() {
+        document.addEventListener('DOMContentLoaded', () => {
             console.log('Documento cargado, inicializando autenticación...');
+            // Verificar si las bibliotecas de Google están cargadas
+            if (typeof gapi === 'undefined') {
+                console.error('Error: gapi no está definido. Verifica la carga de https://apis.google.com/js/api.js');
+                showNotice('Error al cargar la biblioteca de Google API.', 'error');
+                return;
+            }
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.error('Error: google.accounts no está definido. Verifica la carga de https://accounts.google.com/gsi/client');
+                showNotice('Error al cargar la biblioteca de Google Sign-In.', 'error');
+                return;
+            }
+
+            // Cargar gapi.client
+            gapi.load('client', () => {
+                console.log('gapi.client cargado, inicializando cliente...');
+                initializeGapiClient();
+            });
+
+            // Asignar eventos a los botones
+            document.getElementById('authButton').addEventListener('click', () => {
+                console.log('Botón de autenticación clicado');
+                handleAuthClick();
+            });
+            document.getElementById('searchButton').addEventListener('click', searchAnime);
+            document.getElementById('loadPostButton').addEventListener('click', loadPost);
+            document.getElementById('publishButton').addEventListener('click', publishPost);
+        });
+
+        async function initializeGapiClient() {
             try {
+                console.log('Inicializando gapi.client...');
+                await gapi.client.init({
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest'],
+                });
+                console.log('gapi.client inicializado con éxito');
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
-                    callback: (response) => {
-                        if (response.error) {
-                            console.error('Error en la autenticación:', response.error, response.error_description);
-                            updateAuthStatus('Error en la autenticación: ' + response.error_description, 'error');
-                            return;
+                    callback: (tokenResponse) => {
+                        console.log('Respuesta de autenticación:', tokenResponse);
+                        if (tokenResponse.access_token) {
+                            document.getElementById('authStatus').textContent = 'Autenticado con éxito';
+                            document.getElementById('publishButton').disabled = false;
+                            showNotice('Autenticación exitosa.', 'success');
+                        } else {
+                            console.error('Error en la autenticación:', tokenResponse);
+                            showNotice('Error en la autenticación.', 'error');
                         }
-                        accessToken = response.access_token;
-                        console.log('Autenticado con éxito, token:', accessToken);
-                        updateAuthStatus('Autenticado con éxito', 'success');
-                        document.getElementById('publishButton').disabled = false;
-                        gapi.client.setToken({ access_token: accessToken });
-                    }
+                    },
                 });
-
-                const buttonDiv = document.getElementById('authButton');
-                buttonDiv.innerHTML = '<div id="g_id_onload" ' +
-                    'data-client_id="' + CLIENT_ID + '" ' +
-                    'data-callback="handleCredentialResponse"></div>' +
-                    '<div class="g_id_signin" data-type="standard" data-size="large" ' +
-                    'data-theme="outline" data-text="sign_in_with" data-shape="rectangular" ' +
-                    'data-logo_alignment="left"></div>';
-
-                console.log('Botón de autenticación renderizado');
             } catch (error) {
-                console.error('Error al inicializar la autenticación:', error);
-                updateAuthStatus('Error al inicializar la autenticación', 'error');
+                console.error('Error al inicializar gapi.client:', error);
+                showNotice('Error al inicializar el cliente de Google: ' + error.message, 'error');
             }
         }
 
-        function handleCredentialResponse(response) {
-            console.log('Respuesta de credenciales recibida:', response);
+        function handleAuthClick() {
+            if (!tokenClient) {
+                console.error('tokenClient no está inicializado');
+                showNotice('Error: Cliente de autenticación no inicializado.', 'error');
+                return;
+            }
+            console.log('Solicitando token de acceso...');
             tokenClient.requestAccessToken();
         }
 
-        function loadPost() {
-            const postId = document.getElementById('postId').value;
-            if (!postId) {
-                updateAuthStatus('Por favor, ingresa un ID de entrada válido', 'error');
-                return;
-            }
-            if (!accessToken) {
-                updateAuthStatus('Por favor, inicia sesión primero', 'error');
+        function showNotice(message, type) {
+            const notice = document.createElement('div');
+            notice.className = `notice notice-${type}`;
+            notice.textContent = message;
+            document.body.appendChild(notice);
+            setTimeout(() => notice.remove(), 3000);
+        }
+
+        async function searchAnime() {
+            const query = document.getElementById('searchQuery').value.trim();
+            if (!query || isNaN(query)) {
+                showNotice('Introduce un ID numérico válido de MyAnimeList.', 'error');
                 return;
             }
 
-            updateAuthStatus('Cargando entrada...', 'loading');
-            gapi.client.blogger.posts.get({
-                blogId: BLOG_ID,
-                postId: postId
-            }).then(response => {
+            try {
+                const response = await fetch(`https://api.jikan.moe/v4/anime/${query}/full`);
+                if (response.status === 429) {
+                    showNotice('Límite de solicitudes alcanzado. Espera un momento.', 'error');
+                    return;
+                }
+                if (!response.ok) {
+                    showNotice('No se encontró un anime con ese ID.', 'error');
+                    return;
+                }
+                const { data: anime } = await response.json();
+                selectAnime(anime);
+            } catch (error) {
+                console.error('Error fetching anime:', error);
+                showNotice('Error al buscar en MyAnimeList: ' + error.message, 'error');
+            }
+        }
+
+        async function selectAnime(anime) {
+            try {
+                document.getElementById('tituloPrincipal').value = anime.title || '';
+                document.getElementById('tituloAlternativo').value = anime.title_english || anime.title_japanese || (anime.titles?.find(t => t.type === 'Synonym')?.title) || '';
+                document.getElementById('estudio').value = anime.studios?.map(s => s.name).join(', ') || 'Desconocido';
+                document.getElementById('urlPortada').value = anime.images?.jpg?.large_image_url || '';
+                document.getElementById('urlMyAnimeList').value = anime.url || '';
+                document.getElementById('duracion').value = anime.duration || '';
+                document.getElementById('temporadaEstacion').value = anime.season ? anime.season.toLowerCase() : '';
+                document.getElementById('temporadaAño').value = anime.year || '';
+                document.getElementById('episodios').value = anime.episodes ? `${anime.episodes}/${anime.episodes}` : '';
+                const tags = anime.genres?.map(g => g.name.toLowerCase()) || [];
+                if (anime.season && anime.year) {
+                    const seasonTag = `${anime.year} ${anime.season.toLowerCase()}`;
+                    if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(seasonTag)) {
+                        tags.push(seasonTag);
+                    }
+                }
+                const selectTags = document.getElementById('tags');
+                Array.from(selectTags.options).forEach(option => {
+                    option.selected = tags.includes(option.value);
+                });
+
+                let synopsis = anime.synopsis || 'Sin sinopsis disponible.';
+                try {
+                    const response = await fetch('https://graphql.anilist.co', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: `
+                                query ($idMal: Int) {
+                                    Media(idMal: $idMal, type: ANIME) {
+                                        description(asHtml: false)
+                                    }
+                                }
+                            `,
+                            variables: { idMal: parseInt(document.getElementById('searchQuery').value) }
+                        })
+                    });
+                    const { data } = await response.json();
+                    synopsis = data?.Media?.description?.replace(/<[^>]+>/g, '') || `Por favor, traduce manualmente: "${synopsis}"`;
+                } catch (error) {
+                    console.error('Error fetching AniList synopsis:', error);
+                    synopsis = `Por favor, traduce manualmente: "${synopsis}"`;
+                }
+                document.getElementById('sinopsis').value = synopsis;
+
+                showNotice('Datos del anime cargados correctamente.', 'success');
+            } catch (error) {
+                console.error('Error selecting anime:', error);
+                showNotice('Error al cargar los datos: ' + error.message, 'error');
+            }
+        }
+
+        async function loadPost() {
+            const blogId = document.getElementById('blogId').value.trim();
+            const postId = document.getElementById('postId').value.trim();
+            if (!blogId || !postId) {
+                showNotice('Introduce el ID del blog y de la entrada.', 'error');
+                return;
+            }
+
+            try {
+                console.log(`Intentando cargar entrada: Blog ID=${blogId}, Post ID=${postId}`);
+                const response = await gapi.client.blogger.posts.get({
+                    blogId: blogId,
+                    postId: postId
+                });
+                console.log('Respuesta de la API:', response);
                 const post = response.result;
-                console.log('Entrada cargada:', post);
                 console.log('Contenido de la entrada:', post.content);
-                updateAuthStatus('Entrada cargada con éxito', 'success');
+                parsePostContent(post);
+                showNotice('Entrada cargada correctamente.', 'success');
+            } catch (error) {
+                console.error('Error al cargar la entrada:', error);
+                showNotice(`Error al cargar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+            }
+        }
 
-                const
+        function parsePostContent(post) {
+            console.log('Parseando contenido de la entrada:', post.content);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(post.content, 'text/html');
+
+            document.getElementById('tituloPrincipal').value = doc.querySelector('.titles--main')?.textContent || post.title || '';
+            document.getElementById('tituloAlternativo').value = doc.querySelector('.titles--alt')?.textContent || '';
+            document.getElementById('urlPortada').value = doc.querySelector('.anime-info__cover img')?.src || '';
+            document.getElementById('estudio').value = doc.querySelector('.misc__studios span')?.textContent || '';
+            document.getElementById('urlMyAnimeList').value = doc.querySelector('.misc__links a[href*="myanimelist.net"]')?.href || '';
+            document.getElementById('urlAniList').value = doc.querySelector('.misc__links a[href*="anilist.co"]')?.href || '';
+            document.getElementById('sinopsis').value = doc.querySelector('.synopsis__content')?.textContent.replace('<!--more-->', '') || '';
+            document.getElementById('estado').value = doc.querySelector('.airing-status')?.textContent.replace('ESTADO:', '').trim() || 'Finalizado';
+            document.getElementById('duracion').value = doc.querySelector('#duration')?.textContent.replace('Duración:', '').trim() || '';
+            const seasonLink = doc.querySelector('.season a')?.href.match(/\/search\/label\/(\d+)%20(\w+)/);
+            if (seasonLink) {
+                document.getElementById('temporadaAño').value = seasonLink[1];
+                document.getElementById('temporadaEstacion').value = seasonLink[2].toLowerCase();
+            }
+            document.getElementById('tipo').value = doc.querySelector('#format')?.textContent.replace('Tipo:', '').trim() || 'WEBrip';
+            document.getElementById('episodios').value = doc.querySelector('.content__details span b')?.textContent || '';
+
+            const tags = Array.from(doc.querySelectorAll('.anime-tags span a')).map(a => {
+                const tagText = a.textContent.toLowerCase();
+                return tagText.replace(/2025 (\w+)/, (match, season) => `2025 ${season.toLowerCase()}`);
+            });
+            const selectTags = document.getElementById('tags');
+            Array.from(selectTags.options).forEach(option => {
+                option.selected = tags.includes(option.value);
+            });
+
+            const table720 = doc.querySelector('.tab__panel#panel--1 .tab-custom-table');
+            if (table720) {
+                document.getElementById('fansub720').value = table720.querySelector('tr:nth-child(1) td')?.textContent || '';
+                const subtitulos720 = table720.querySelector('tr:nth-child(2) td')?.textContent.split(', ') || [];
+                document.getElementsByName('subtitulos720').forEach(cb => {
+                    cb.checked = subtitulos720.includes(cb.value);
+                });
+                const idioma720 = table720.querySelector('tr:nth-child(3) td')?.textContent.split(', ') || [];
+                const selectIdioma720 = document.getElementById('idioma720');
+                Array.from(selectIdioma720.options).forEach(option => {
+                    option.selected = idioma720.includes(option.value);
+                });
+                document.getElementById('encoder720').value = table720.querySelector('tr:nth-child(4) td')?.textContent || '';
+                document.getElementById('tamaño720').value = table720.querySelector('tr:nth-child(9) td')?.textContent || '';
+                const servidores720 = table720.querySelector('tr:nth-child(10) td')?.textContent.split(', ') || [];
+                const selectServidores720 = document.getElementById('servidores720');
+                Array.from(selectServidores720.options).forEach(option => {
+                    option.selected = servidores720.includes(option.value);
+                });
+                document.getElementById('uploader720').value = table720.querySelector('tr:nth-child(11) td')?.textContent || '';
+                document.getElementById('enlaces720').value = table720.querySelector('.custom-detail__panel a[href*="pastebin.com"]')?.href || '';
+            }
+
+            const table1080 = doc.querySelector('.tab__panel#panel--2 .tab-custom-table');
+            if (table1080) {
+                document.getElementById('fansub1080').value = table1080.querySelector('tr:nth-child(1) td')?.textContent || '';
+                const subtitulos1080 = table1080.querySelector('tr:nth-child(2) td')?.textContent.split(', ') || [];
+                document.getElementsByName('subtitulos1080').forEach(cb => {
+                    cb.checked = subtitulos1080.includes(cb.value);
+                });
+                const idioma1080 = table1080.querySelector('tr:nth-child(3) td')?.textContent.split(', ') || [];
+                const selectIdioma1080 = document.getElementById('idioma1080');
+                Array.from(selectIdioma1080.options).forEach(option => {
+                    option.selected = idioma1080.includes(option.value);
+                });
+                document.getElementById('ripper1080').value = table1080.querySelector('tr:nth-child(4) td')?.textContent || '';
+                document.getElementById('rawEncode1080').value = table1080.querySelector('tr:nth-child(5) td')?.textContent || '';
+                document.getElementById('muxeo1080').value = table1080.querySelector('tr:nth-child(6) td')?.textContent || '';
+                document.getElementById('formato1080').value = table1080.querySelector('tr:nth-child(7) td')?.textContent || 'MKV (x265)';
+                document.getElementById('tamaño1080').value = table1080.querySelector('tr:nth-child(11) td')?.textContent || '';
+                const servidores1080 = table1080.querySelector('tr:nth-child(12) td')?.textContent.split(', ') || [];
+                const selectServidores1080 = document.getElementById('servidores1080');
+                Array.from(selectServidores1080.options).forEach(option => {
+                    option.selected = servidores1080.includes(option.value);
+                });
+                document.getElementById('uploader1080').value = table1080.querySelector('tr:nth-child(13) td')?.textContent || '';
+                document.getElementById('enlaces1080').value = table1080.querySelector('.custom-detail__panel a[href*="pastebin.com"]')?.href || '';
+            }
+        }
+
+        async function publishPost() {
+            const blogId = document.getElementById('blogId').value.trim();
+            const postId = document.getElementById('postId').value.trim();
+            const publishStatus = document.getElementById('publishStatus').value;
+            if (!blogId) {
+                showNotice('Introduce el ID del blog.', 'error');
+                return;
+            }
+
+            const htmlContent = document.getElementById('htmlOutput').value;
+            if (!htmlContent) {
+                showNotice('Genera el HTML primero.', 'error');
+                return;
+            }
+
+            const postData = {
+                title: document.getElementById('tituloPrincipal').value,
+                content: htmlContent,
+                labels: Array.from(document.getElementById('tags').selectedOptions).map(option => {
+                    if (['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'].includes(option.value)) {
+                        return option.value.replace(/(\d{4}) (\w+)/, (match, year, season) => 
+                            `${year} ${season.charAt(0).toUpperCase() + season.slice(1)}`
+                        );
+                    }
+                    return option.value;
+                }),
+                status: publishStatus
+            };
+
+            try {
+                let response;
+                if (postId) {
+                    response = await gapi.client.blogger.posts.patch({
+                        blogId: blogId,
+                        postId: postId,
+                        resource: postData
+                    });
+                } else {
+                    response = await gapi.client.blogger.posts.insert({
+                        blogId: blogId,
+                        resource: postData
+                    });
+                }
+                showNotice(`Entrada ${postId ? 'actualizada' : 'publicada'} con éxito: ${response.result.url}`, 'success');
+                document.getElementById('postId').value = response.result.id;
+            } catch (error) {
+                console.error('Error publishing post:', error);
+                showNotice(`Error al publicar la entrada: ${error.result?.error?.message || error.message}`, 'error');
+            }
+        }
+
+        function generateHTML() {
+            const form = document.getElementById('animeForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            data.subtitulos720 = formData.getAll('subtitulos720').join(', ');
+            data.idioma720 = formData.getAll('idioma720').join(', ');
+            data.servidores720 = formData.getAll('servidores720').join(', ');
+            data.subtitulos1080 = formData.getAll('subtitulos1080').join(', ');
+            data.idioma1080 = formData.getAll('idioma1080').join(', ');
+            data.servidores1080 = formData.getAll('servidores1080').join(', ');
+            data.tags = formData.getAll('tags');
+
+            const seasonTags = ['2025 verano', '2025 otoño', '2025 invierno', '2025 primavera'];
+            const tagsHTML = data.tags.map(tag => {
+                if (seasonTags.includes(tag)) {
+                    const displayTag = tag.replace(/(\d{4}) (\w+)/, (match, year, season) => 
+                        `${year} ${season.charAt(0).toUpperCase() + season.slice(1)}`
+                    );
+                    const urlTag = encodeURIComponent(displayTag);
+                    return `<span><a href="/search/label/${urlTag}">${displayTag}</a></span>`;
+                }
+                return `<span><a href="/search/label/${tag}">${tag}</a></span>`;
+            }).join('\n');
+
+            const htmlContent = `
+<main class="anime-main">
+    <section>
+        <div class="notes">
+            <p>[Descarga] ${data.tituloPrincipal}: HDL MP4 - FHD MKV</p>
+        </div>
+    </section>
+    <section class="anime-info">
+        <div class="anime-info__cover">
+            <img src="${data.urlPortada}" alt="cover">
+        </div>
+        <div class="anime-info__content">
+            <div class="content__titles">
+                <p class="titles--main">${data.tituloPrincipal}</p>
+                <p class="titles--alt">${data.tituloAlternativo}</p>
+            </div>
+            <div class="content__misc">
+                <div class="misc__studios">
+                    <span>${data.estudio}</span>
+                </div>
+                <div class="misc__links">
+                    ${data.urlMyAnimeList ? `<a href="${data.urlMyAnimeList}" target="_blank">MyAnimeList</a>` : ''}
+                    ${data.urlAniList ? `<a href="${data.urlAniList}" target="_blank">AniList</a>` : ''}
+                </div>
+            </div>
+            <div class="content__synopsis">
+                <h2 class="synopsis__title">SINOPSIS</h2>
+                <p class="synopsis__content">${data.sinopsis}<!--more--></p>
+            </div>
+        </div>
+    </section>
+    <div class="content__details">
+        <div class="airing-status">
+            <span><b>ESTADO:</b></span>${data.estado}
+            <br>
+        </div>
+        <span id="duration">
+            <svg class="i i-clock" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 7v5l3 3"></path>
+            </svg>
+            Duración:<br>${data.duracion}
+        </span>
+        <span class="season">
+            <svg class="i i-calendar" viewBox="0 0 24 24">
+                <rect width="18" height="17" x="3" y="5" rx="2"></rect>
+                <path d="M7 2v3m10-3v3M3 10h18"></path>
+            </svg>
+            Temporada:<br><a href="/search/label/${data.temporadaAño}%20${data.temporadaEstacion.charAt(0).toUpperCase() + data.temporadaEstacion.slice(1)}">${data.temporadaEstacion.charAt(0).toUpperCase() + data.temporadaEstacion.slice(1)} ${data.temporadaAño}</a>
+        </span>
+        <span id="format">
+            <svg class="i i-tv-retro" viewBox="0 0 24 24">
+                <rect width="20" height="15" x="2" y="7" rx="3"></rect>
+                <path d="m7 2 5 5 5-5"></path>
+            </svg>
+            Tipo:<br>${data.tipo}
+        </span>
+        <span>
+            <svg class="i i-list" viewBox="0 0 24 24">
+                <path d="M7 6h14M7 12h14M7 18h14M3 6h0m0 6h0m0 18h0"></path>
+            </svg>
+            Episodios:<br><b>${data.episodios}</b>
+        </span>
+    </div>
+    <section class="anime-tags">${tagsHTML}</section>
+    <section class="anime-related"></section>
+    <hr class="break-line">
+    <div style="text-align: center;">
+        <b><u>Contraseña:</u></b>
+        <span id="enlace">animeyseriesdo</span>
+        <button id="copiador">Copiar <i aria-hidden="true" class="fa fa-files-o"></i></button>
+    </div>
+    <section class="tabs-custom">
+        <div class="tab__btns">
+            <button class="tab__btn" panel-target="panel--1">720p HDL</button>
+            <button class="tab__btn" panel-target="panel--2">1080p FHD</button>
+        </div>
+        <div class="tab__panels">
+            <div class="tab__panel" id="panel--1">
+                <table class="tab-custom-table">
+                    <tr><th>Fansub:</th><td>${data.fansub720}</td></tr>
+                    <tr><th>Subtítulos:</th><td>${data.subtitulos720}</td></tr>
+                    <tr><th>Idioma (Audio):</th><td>${data.idioma720}</td></tr>
+                    <tr><th>Encoder:</th><td>${data.encoder720}</td></tr>
+                    <tr><th>Formato:</th><td>${data.formato720}</td></tr>
+                    <tr><th>Resolución:</th><td>${data.resolucion720}</td></tr>
+                    <tr><th>Comprimido:</th><td>${data.comprimido720}</td></tr>
+                    <tr><th>Calidad:</th><td>${data.calidad720}</td></tr>
+                    <tr><th>Tamaño por archivo:</th><td>${data.tamaño720}</td></tr>
+                    <tr><th>Servidores:</th><td>${data.servidores720}</td></tr>
+                    <tr><th>Uploader:</th><td>${data.uploader720}</td></tr>
+                </table>
+                <div class="custom-detail">
+                    <button class="custom-detail__btn" panel-target="detail-panel--1">
+                        <span class="btn__text">Mostrar enlaces: HDL</span>
+                        <svg class="i i-chevron-down" viewBox="0 0 24 24">
+                            <path d="m4 8 8 8 8-8"></path>
+                        </svg>
+                    </button>
+                    <div class="custom-detail__panel" id="detail-panel--1">
+                        ${data.enlaces720 ? `<a href="${data.enlaces720}" rel="nofollow" target="_blank">
+                            <svg class="i i-download" viewBox="0 0 24 24">
+                                <path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>
+                            </svg>
+                            Paste
+                        </a>` : ''}
+                    </div>
+                </div>
+            </div>
+            <div class="tab__panel" id="panel--2">
+                <table class="tab-custom-table">
+                    <tr><th>Fansub:</th><td>${data.fansub1080}</td></tr>
+                    <tr><th>Subtítulos:</th><td>${data.subtitulos1080}</td></tr>
+                    <tr><th>Idioma:</th><td>${data.idioma1080}</td></tr>
+                    <tr><th>Ripper:</th><td>${data.ripper1080}</td></tr>
+                    <tr><th>Raw/Encode:</th><td>${data.rawEncode1080}</td></tr>
+                    <tr><th>Muxeo:</th><td>${data.muxeo1080}</td></tr>
+                    <tr><th>Formato:</th><td>${data.formato1080}</td></tr>
+                    <tr><th>Resolución:</th><td>${data.resolucion1080}</td></tr>
+                    <tr><th>Comprimido:</th><td>${data.comprimido1080}</td></tr>
+                    <tr><th>Calidad:</th><td>${data.calidad1080}</td></tr>
+                    <tr><th>Tamaño por archivo:</th><td>${data.tamaño1080}</td></tr>
+                    <tr><th>Servidores:</th><td>${data.servidores1080}</td></tr>
+                    <tr><th>Uploader:</th><td>${data.uploader1080}</td></tr>
+                </table>
+                <div class="custom-detail">
+                    <button class="custom-detail__btn" panel-target="detail-panel--2">
+                        <span class="btn__text">Mostrar enlaces: FHD</span>
+                        <svg class="i i-chevron-down" viewBox="0 0 24 24">
+                            <path d="m4 8 8 8 8-8"></path>
+                        </svg>
+                    </button>
+                    <div class="custom-detail__panel" id="detail-panel--2">
+                        ${data.enlaces1080 ? `<a href="${data.enlaces1080}" rel="nofollow" target="_blank">
+                            <svg class="i i-download" viewBox="0 0 24 24">
+                                <path d="m7 10 5 5 5-5m-5 5V3m10 12v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4"></path>
+                            </svg>
+                            Paste
+                        </a>` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+`;
+
+            document.getElementById('htmlOutput').value = htmlContent;
+            document.getElementById('preview').innerHTML = htmlContent;
+        }
+
+        function copyHTML() {
+            const htmlOutput = document.getElementById('htmlOutput');
+            htmlOutput.select();
+            document.execCommand('copy');
+            showNotice('HTML copiado al portapapeles.', 'success');
+        }
+    </script>
+</body>
+</html>
