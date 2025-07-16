@@ -56,6 +56,7 @@
         <div class="section-card auth mb-8">
             <h2 class="section-title"><i class="fas fa-user-lock mr-2"></i>Autenticación</h2>
             <p class="section-description">Inicia sesión con Google para conectar con Blogger.</p>
+            <hr class="section-divider">
             <p id="authStatus" class="text-gray-300 mb-4"></p>
             <div class="floating-label">
                 <input type="text" id="blogId" value="3321190454875664092" class="input-field" readonly>
@@ -68,6 +69,7 @@
             <div class="section-card search">
                 <h2 class="section-title"><i class="fas fa-search mr-2"></i>Buscar Anime</h2>
                 <p class="section-description">Busca un anime por su ID de MyAnimeList para autocompletar el formulario.</p>
+                <hr class="section-divider">
                 <div class="flex gap-4">
                     <div class="floating-label flex-1">
                         <input type="text" id="searchQuery" placeholder=" " class="input-field">
@@ -79,6 +81,7 @@
             <div class="section-card edit">
                 <h2 class="section-title"><i class="fas fa-file-import mr-2"></i>Editar Entrada</h2>
                 <p class="section-description">Carga una entrada existente desde Blogger para editarla.</p>
+                <hr class="section-divider">
                 <div class="flex gap-4">
                     <div class="floating-label flex-1">
                         <input type="text" id="postId" placeholder=" " class="input-field">
@@ -95,6 +98,7 @@
             <div class="section-card general">
                 <h2 class="section-title"><i class="fas fa-info-circle mr-2"></i>Información General</h2>
                 <p class="section-description">Completa los detalles principales del anime.</p>
+                <hr class="section-divider">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="floating-label">
                         <input type="text" id="tituloPrincipal" name="tituloPrincipal" class="input-field">
@@ -105,9 +109,10 @@
                         <label for="tituloAlternativo">Título alternativo</label>
                     </div>
                     <div class="floating-label md:col-span-2">
-                        <textarea id="sinopsis" name="sinopsis" class="input-field h-24"></textarea>
+                        <textarea id="sinopsis" name="sinopsis" class="input-field h-28"></textarea>
                         <label for="sinopsis">Sinopsis</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="urlPortada" name="urlPortada" class="input-field">
                         <label for="urlPortada">URL de la portada</label>
@@ -124,6 +129,7 @@
                         <input type="text" id="urlAniList" name="urlAniList" class="input-field">
                         <label for="urlAniList">URL AniList</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="trailerUrl" name="trailerUrl" class="input-field">
                         <label for="trailerUrl">URL del Trailer</label>
@@ -144,6 +150,7 @@
                         <input type="text" id="duracion" name="duracion" class="input-field">
                         <label for="duracion">Duración</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <select id="temporadaEstacion" name="temporadaEstacion" class="input-field">
                             <option value="invierno">Invierno</option>
@@ -168,8 +175,9 @@
                         <input type="text" id="episodios" name="episodios" class="input-field">
                         <label for="episodios">Episodios (ej. 06/25)</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label md:col-span-2">
-                        <select id="tags" name="tags" multiple class="input-field h-24">
+                        <select id="tags" name="tags" multiple class="input-field h-28">
                             <option value="acción">Acción</option>
                             <option value="ángeles">Ángeles</option>
                             <option value="artes marciales">Artes Marciales</option>
@@ -222,9 +230,10 @@
                         <label for="tags">Géneros</label>
                     </div>
                     <div class="floating-label md:col-span-2">
-                        <textarea id="videoIframe" name="videoIframe" class="input-field h-24"></textarea>
+                        <textarea id="videoIframe" name="videoIframe" class="input-field h-28"></textarea>
                         <label for="videoIframe">URL del Reproductor (iframe)</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="contrasena" name="contrasena" class="input-field" value="animeyseriesdo">
                         <label for="contrasena">Contraseña</label>
@@ -236,6 +245,7 @@
             <div class="section-card hdl720">
                 <h2 class="section-title"><i class="fas fa-video mr-2"></i>Datos 720p HDL</h2>
                 <p class="section-description">Especifica los detalles técnicos para la versión 720p.</p>
+                <hr class="section-divider">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="floating-label">
                         <select id="fansub720" name="fansub720" class="input-field"></select>
@@ -246,15 +256,16 @@
                         </div>
                     </div>
                     <div class="floating-label">
-                        <select id="subtitulos720" name="subtitulos720" multiple class="input-field h-24">
+                        <select id="subtitulos720" name="subtitulos720" multiple class="input-field h-28">
                             <option value="Español Neutro">Español Neutro</option>
                             <option value="Español Latino">Español Latino</option>
                             <option value="Español España">Español España</option>
                         </select>
                         <label for="subtitulos720">Subtítulos</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
-                        <select id="idioma720" name="idioma720" multiple class="input-field h-24">
+                        <select id="idioma720" name="idioma720" multiple class="input-field h-28">
                             <option value="Japonés">Japonés</option>
                             <option value="Latino">Latino</option>
                             <option value="Castellano">Castellano</option>
@@ -272,6 +283,7 @@
                             <button type="button" onclick="addOption('encoder720', 'newEncoder720')" class="btn btn-secondary"><i class="fas fa-plus mr-2"></i>Añadir</button>
                         </div>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="formato720" name="formato720" value="MP4 (x264)" readonly class="input-field">
                         <label for="formato720">Formato</label>
@@ -291,12 +303,13 @@
                         <input type="text" id="calidad720" name="calidad720" value="Muy buena" readonly class="input-field">
                         <label for="calidad720">Calidad</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="tamaño720" name="tamaño720" class="input-field">
                         <label for="tamaño720">Tamaño por archivo</label>
                     </div>
                     <div class="floating-label">
-                        <select id="servidores720" name="servidores720" multiple class="input-field h-24">
+                        <select id="servidores720" name="servidores720" multiple class="input-field h-28">
                             <option value="Mega">Mega</option>
                             <option value="MediaFire">MediaFire</option>
                             <option value="File">File</option>
@@ -309,6 +322,7 @@
                             <button type="button" onclick="addOption('servidores720', 'newServidores720', true)" class="btn btn-secondary"><i class="fas fa-plus mr-2"></i>Añadir</button>
                         </div>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <select id="uploader720" name="uploader720" class="input-field">
                             <option value="Nookcir DOM">Nookcir DOM</option>
@@ -327,6 +341,7 @@
             <div class="section-card fhd1080">
                 <h2 class="section-title"><i class="fas fa-film mr-2"></i>Datos 1080p FHD</h2>
                 <p class="section-description">Especifica los detalles técnicos para la versión 1080p.</p>
+                <hr class="section-divider">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="floating-label">
                         <select id="fansub1080" name="fansub1080" class="input-field"></select>
@@ -337,15 +352,16 @@
                         </div>
                     </div>
                     <div class="floating-label">
-                        <select id="subtitulos1080" name="subtitulos1080" multiple class="input-field h-24">
+                        <select id="subtitulos1080" name="subtitulos1080" multiple class="input-field h-28">
                             <option value="Español Neutro">Español Neutro</option>
                             <option value="Español Latino">Español Latino</option>
                             <option value="Español España">Español España</option>
                         </select>
                         <label for="subtitulos1080">Subtítulos</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
-                        <select id="idioma1080" name="idioma1080" multiple class="input-field h-24">
+                        <select id="idioma1080" name="idioma1080" multiple class="input-field h-28">
                             <option value="Japonés">Japonés</option>
                             <option value="Español España">Español España</option>
                             <option value="Español Latino">Español Latino</option>
@@ -362,6 +378,7 @@
                             <button type="button" onclick="addOption('ripper1080', 'newRipper1080')" class="btn btn-secondary"><i class="fas fa-plus mr-2"></i>Añadir</button>
                         </div>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <select id="raw1080" name="raw1080" class="input-field">
                             <option value="DKB Team">DKB Team</option>
@@ -382,6 +399,7 @@
                             <button type="button" onclick="addOption('encode1080', 'newEncode1080')" class="btn btn-secondary"><i class="fas fa-plus mr-2"></i>Añadir</button>
                         </div>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <select id="muxeo1080" name="muxeo1080" class="input-field">
                             <option value="Colla">Colla</option>
@@ -406,6 +424,7 @@
                             <button type="button" onclick="addOption('formato1080', 'newFormato1080')" class="btn btn-secondary"><i class="fas fa-plus mr-2"></i>Añadir</button>
                         </div>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="resolucion1080" name="resolucion1080" value="1920x1080" readonly class="input-field">
                         <label for="resolucion1080">Resolución</label>
@@ -425,8 +444,9 @@
                         <input type="text" id="tamaño1080" name="tamaño1080" class="input-field">
                         <label for="tamaño1080">Tamaño por archivo</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
-                        <select id="servidores1080" name="servidores1080" multiple class="input-field h-24">
+                        <select id="servidores1080" name="servidores1080" multiple class="input-field h-28">
                             <option value="Mega">Mega</option>
                             <option value="MediaFire">MediaFire</option>
                             <option value="File">File</option>
@@ -447,6 +467,7 @@
                         </select>
                         <label for="uploader1080">Uploader</label>
                     </div>
+                    <hr class="section-divider md:col-span-2">
                     <div class="floating-label">
                         <input type="text" id="enlaces1080" name="enlaces1080" class="input-field">
                         <label for="enlaces1080">Enlaces 1080p (Pastebin o Index)</label>
@@ -455,59 +476,67 @@
             </div>
 
             <!-- Acciones -->
-            <div class="flex gap-4 flex-wrap">
-                <button type="button" onclick="generateHTML()" class="btn btn-primary tooltip" data-tooltip="Genera el código HTML para Blogger">
-                    <i class="fas fa-code mr-2"></i>Generar HTML
-                </button>
-                <button type="button" id="publishButton" disabled class="btn btn-primary tooltip" data-tooltip="Publica directamente en Blogger">
-                    <i class="fas fa-upload mr-2"></i>Publicar
-                </button>
-                <div class="floating-label">
-                    <select id="publishStatus" class="input-field p-2">
-                        <option value="PUBLISHED">Publicado</option>
-                        <option value="DRAFT">Borrador</option>
-                    </select>
-                    <label for="publishStatus">Estado de publicación</label>
+            <div class="section-card actions">
+                <h2 class="section-title"><i class="fas fa-cogs mr-2"></i>Acciones</h2>
+                <p class="section-description">Genera o publica la ficha del anime.</p>
+                <hr class="section-divider">
+                <div class="flex gap-4 flex-wrap">
+                    <button type="button" onclick="generateHTML()" class="btn btn-primary tooltip" data-tooltip="Genera el código HTML para Blogger">
+                        <i class="fas fa-code mr-2"></i>Generar HTML
+                    </button>
+                    <button type="button" id="publishButton" disabled class="btn btn-primary tooltip" data-tooltip="Publica directamente en Blogger">
+                        <i class="fas fa-upload mr-2"></i>Publicar
+                    </button>
+                    <div class="floating-label">
+                        <select id="publishStatus" class="input-field p-2">
+                            <option value="PUBLISHED">Publicado</option>
+                            <option value="DRAFT">Borrador</option>
+                        </select>
+                        <label for="publishStatus">Estado de publicación</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista Previa -->
+            <div class="section-card preview">
+                <h2 class="section-title"><i class="fas fa-eye mr-2"></i>Vista Previa</h2>
+                <p class="section-description">Visualiza cómo se verá la entrada en Blogger.</p>
+                <hr class="section-divider">
+                <div class="preview-container">
+                    <div id="preview" class="p-4 bg-gray-800 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- HTML Generado -->
+            <div class="section-card html">
+                <h2 class="section-title"><i class="fas fa-file-code mr-2"></i>HTML Generado</h2>
+                <p class="section-description">Copia el código HTML para usarlo en Blogger.</p>
+                <hr class="section-divider">
+                <div class="html-output-container">
+                    <textarea id="htmlOutput" readonly class="input-field h-40 font-mono"></textarea>
+                    <button onclick="copyHTML()" class="btn btn-primary mt-4"><i class="fas fa-copy mr-2"></i>Copiar HTML</button>
+                </div>
+            </div>
+
+            <!-- Probar Botones de Preferencias -->
+            <div class="section-card buttons">
+                <h2 class="section-title"><i class="fas fa-bookmark mr-2"></i>Probar Botones de Preferencias</h2>
+                <p class="section-description">Prueba las acciones de seguimiento y favoritos.</p>
+                <hr class="section-divider">
+                <div class="bookmark-buttons flex gap-4">
+                    <button class="bookmark-btn" id="btn-follow"><i class="fas fa-eye mr-2"></i>Seguir</button>
+                    <button class="bookmark-btn" id="btn-favorite"><i class="fas fa-star mr-2"></i>Favorito</button>
+                    <button class="bookmark-btn" id="btn-plan"><i class="fas fa-list mr-2"></i>En Plan</button>
                 </div>
             </div>
         </form>
-
-        <!-- Vista Previa -->
-        <div class="section-card preview">
-            <h2 class="section-title"><i class="fas fa-eye mr-2"></i>Vista Previa</h2>
-            <p class="section-description">Visualiza cómo se verá la entrada en Blogger.</p>
-            <div class="preview-container">
-                <div id="preview" class="p-4 bg-gray-800 rounded-lg"></div>
-            </div>
-        </div>
-
-        <!-- HTML Generado -->
-        <div class="section-card html">
-            <h2 class="section-title"><i class="fas fa-file-code mr-2"></i>HTML Generado</h2>
-            <p class="section-description">Copia el código HTML para usarlo en Blogger.</p>
-            <div class="html-output-container">
-                <textarea id="htmlOutput" readonly class="input-field h-40 font-mono"></textarea>
-                <button onclick="copyHTML()" class="btn btn-primary mt-4"><i class="fas fa-copy mr-2"></i>Copiar HTML</button>
-            </div>
-        </div>
-
-        <!-- Probar Botones de Preferencias -->
-        <div class="section-card buttons">
-            <h2 class="section-title"><i class="fas fa-bookmark mr-2"></i>Probar Botones de Preferencias</h2>
-            <p class="section-description">Prueba las acciones de seguimiento y favoritos.</p>
-            <div class="bookmark-buttons flex gap-4">
-                <button class="bookmark-btn" id="btn-follow"><i class="fas fa-eye mr-2"></i>Seguir</button>
-                <button class="bookmark-btn" id="btn-favorite"><i class="fas fa-star mr-2"></i>Favorito</button>
-                <button class="bookmark-btn" id="btn-plan"><i class="fas fa-list mr-2"></i>En Plan</button>
-            </div>
-        </div>
     </main>
 
     <!-- Footer -->
     <footer class="bg-gray-800 py-4">
         <div class="max-w-7xl mx-auto px-4 text-center text-gray-400">
             <p>Generador de Ficha Anime v1.0.0 | Desarrollado por <a href="https://github.com/usuario/anime-ficha-generator" class="text-blue-400 hover:underline">Anime Ficha Generator</a></p>
-            <p class="mt-1">Licencia MIT &copy; 2025</p>
+            <p class="mt-1">Licencia MIT © 2025</p>
         </div>
     </footer>
 
