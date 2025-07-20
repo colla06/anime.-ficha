@@ -3,19 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AYSDO - Inicio</title>
+  <title>AYSDO - Anime App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <header>
-    <h1>AYSDO</h1>
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Buscar anime...">
-      <button onclick="searchAnime()">Buscar</button>
+<body class="bg-black text-white font-sans">
+  <!-- Header with Search -->
+  <header class="p-4 sticky top-0 bg-black z-10">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">AYSDO</h1>
+      <input type="text" id="searchInput" placeholder="Buscar anime..." class="p-2 rounded bg-gray-900 text-white w-2/3 focus:outline-none">
     </div>
   </header>
-  <div class="anime-grid" id="anime-grid"></div>
+
+  <!-- Latest Episodes Section -->
+  <section id="latestEpisodes" class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Últimos Capítulos</h2>
+    <div id="latestEpisodesList" class="grid grid-cols-1 gap-4"></div>
+  </section>
+
+  <!-- Anime List Section -->
+  <section id="animeList" class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Todos los Animes</h2>
+    <div id="animeListContainer" class="grid grid-cols-1 gap-4"></div>
+  </section>
+
+  <!-- Anime Detail Modal -->
+  <div id="animeModal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex-col p-4 overflow-y-auto">
+    <button id="closeModal" class="self-end text-2xl">&times;</button>
+    <img id="modalImage" class="w-full h-48 object-cover rounded mb-4">
+    <h2 id="modalTitle" class="text-2xl font-bold mb-2"></h2>
+    <p id="modalSynopsis" class="mb-4"></p>
+    <h3 class="text-xl font-semibold mb-2">Capítulos</h3>
+    <ul id="modalEpisodes" class="space-y-2"></ul>
+  </div>
+
+  <script src="js/data.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/home.js"></script>
 </body>
 </html>
