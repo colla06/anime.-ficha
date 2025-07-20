@@ -67,17 +67,54 @@ async function translateSynopsis(text) {
   }
 }
 
+// Populate existing anime dropdown
+function populateExistingAnime() {
+  const select = document.getElementById('existingAnime');
+  if (!select) return;
+  select.innerHTML = '<option value="">Seleccionar anime existente (para añadir episodios)</option>';
+  animeData.forEach(anime => {
+    const option = document.createElement('option');
+    option.value = anime.id;
+    option.textContent = anime.title;
+    select.appendChild(option);
+  });
+}
+
 // Autocomplete for MyAnimeList ID (admin page)
-if (document.getElementById('animeId')) {
-  document.getElementById('animeId').addEventListener('input', async (e) => {
-    const id = e.target.value;
-    if (!id || isNaN(id)) return;
+if (document.getElementById('fetchAnime')) {
+  document.getElementById('fetchAnime').addEventListener('click', async () => {
+    const id = document.getElementById('animeId').value;
+    if (!id || isNaN(id)) {
+      document.getElementById('error').textContent = 'Por favor, ingrese un ID válido.';
+      document.getElementById('error').classList.remove('hidden');
+      return;
+    }
     const anime = await searchMyAnimeListById(id);
     if (anime) {
       document.getElementById('animeTitle').value = anime.title;
       document.getElementById('animeImage').value = anime.image;
       document.getElementById('animeSynopsis').value = anime.synopsis;
+      document.getElementById('existingAnime').value = '';
     }
+  });
+}
+
+// Add episode field dynamically
+if (document.getElementById('addEpisode')) {
+  document.getElementById('addEpisode').addEventListener('click', () => {
+    const container = document.getElementById('episodesContainer');
+    const newField = document.createElement('div');
+    newField.className = 'episode-field flex space-x-2';
+    newField.innerHTML = `
+      <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
+      <input type="text" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
+      <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
+      <button type="button" class="remove-episode p-2 bg-red-600 rounded">✕</button>
+    `;
+    container.appendChild(newField);
+    newField.querySelector('.remove-episode').addEventListener('click', () => {
+      newField.remove();
+    });
   });
 }
 
@@ -85,28 +122,70 @@ if (document.getElementById('animeId')) {
 if (document.getElementById('animeForm')) {
   document.getElementById('animeForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const episode1Url = document.getElementById('episode1Url').value;
-    if (!episode1Url.startsWith('mpv://')) {
-      document.getElementById('error').textContent = 'La URL del episodio debe comenzar con mpv://';
-      document.getElementById('error').classList.remove('hidden');
-      return;
+    const existingAnimeId = document.getElementById('existingAnime').value;
+    const episodeFields = document.querySelectorAll('.episode-field');
+    const episodes = Array.from(episodeFields).map(field => {
+      const number = field.querySelector('.episode-number').value;
+      const title = field.querySelector('.episode-title').value;
+      const url = field.querySelector('.episode-url').value;
+      if (!url.startsWith('mpv://')) {
+        document.getElementById('error').textContent = 'Todas las URLs deben comenzar con mpv://';
+        document.getElementById('error').classList.remove('hidden');
+        throw new Error('Invalid URL');
+      }
+      return { number: parseInt(number), title, url };
+    });
+
+    if (existingAnimeId) {
+      // Add episodes to existing anime
+      const anime = animeData.find(a => a.id == existingAnimeId);
+      if (anime) {
+        episodes.forEach(ep => {
+          anime.episodes.push(ep);
+          latestEpisodes.push({ anime: anime.title, episode: ep });
+        });
+        localStorage.setItem('animeData', JSON.stringify(animeData));
+        localStorage.setItem('latestEpisodes', JSON.stringify(latestEpisodes));
+        document.getElementById('animeForm').reset();
+        document.getElementById('episodesContainer').innerHTML = `
+          <div class="episode-field flex space-x-2">
+            <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
+            <input type="text" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
+            <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
+            <button type="button" class="remove-episode p-2 bg-red-600 rounded hidden">✕</button>
+          </div>
+        `;
+        document.getElementById('error').classList.add('hidden');
+        alert('Episodios añadidos con éxito.');
+      }
+    } else {
+      // Create new anime
+      const newAnime = {
+        id: animeData.length + 1,
+        title: document.getElementById('animeTitle').value,
+        image: document.getElementById('animeImage').value,
+        synopsis: document.getElementById('animeSynopsis').value,
+        episodes
+      };
+      animeData.push(newAnime);
+      episodes.forEach(ep => {
+        latestEpisodes.push({ anime: newAnime.title, episode: ep });
+      });
+      localStorage.setItem('animeData', JSON.stringify(animeData));
+      localStorage.setItem('latestEpisodes', JSON.stringify(latestEpisodes));
+      document.getElementById('animeForm').reset();
+      document.getElementById('episodesContainer').innerHTML = `
+        <div class="episode-field flex space-x-2">
+          <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
+          <input type="text" class="портал" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
+          <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
+          <button type="button" class="remove-episode p-2 bg-red-600 rounded hidden">✕</button>
+        </div>
+      `;
+      document.getElementById('error').classList.add('hidden');
+      alert('Anime añadido con éxito.');
     }
-    const newAnime = {
-      id: animeData.length + 1,
-      title: document.getElementById('animeTitle').value,
-      image: document.getElementById('animeImage').value,
-      synopsis: document.getElementById('animeSynopsis').value,
-      episodes: [
-        { number: 1, title: "Episodio 1", url: episode1Url }
-      ]
-    };
-    animeData.push(newAnime);
-    latestEpisodes.push({ anime: newAnime.title, episode: newAnime.episodes[0] });
-    localStorage.setItem('animeData', JSON.stringify(animeData));
-    localStorage.setItem('latestEpisodes', JSON.stringify(latestEpisodes));
-    document.getElementById('animeForm').reset();
-    document.getElementById('error').classList.add('hidden');
-    alert('Anime añadido con éxito.');
+    populateExistingAnime();
   });
 }
 
@@ -253,3 +332,4 @@ function loadData() {
 loadData();
 renderLatestEpisodes();
 renderAnimeList();
+populateExistingAnime();
