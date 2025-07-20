@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AYSDO: Tu app minimalista para ver anime en móvil">
+  <meta name="keywords" content="anime, streaming, móvil, AMOLED">
+  <meta name="theme-color" content="#000000">
   <title>AYSDO - Anime App</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
@@ -15,6 +18,19 @@
       <input type="text" id="searchInput" placeholder="Buscar anime..." class="p-2 rounded bg-gray-900 text-white w-2/3 focus:outline-none">
     </div>
   </header>
+
+  <!-- Generator Form -->
+  <section id="generator" class="p-4">
+    <h2 class="text-xl font-semibold mb-4">Añadir Anime</h2>
+    <form id="animeForm" class="space-y-4">
+      <input type="text" id="animeSearch" placeholder="Buscar en MyAnimeList..." class="p-2 rounded bg-gray-900 text-white w-full">
+      <input type="text" id="animeTitle" placeholder="Título" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <input type="text" id="animeImage" placeholder="URL de la imagen" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <textarea id="animeSynopsis" placeholder="Sinopsis" class="p-2 rounded bg-gray-900 text-white w-full" required></textarea>
+      <input type="text" id="episode1Url" placeholder="URL del capítulo 1 (mpv://...)" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <button type="submit" class="p-2 bg-blue-600 rounded w-full">Añadir Anime</button>
+    </form>
+  </section>
 
   <!-- Latest Episodes Section -->
   <section id="latestEpisodes" class="p-4">
@@ -30,7 +46,7 @@
 
   <!-- Anime Detail Modal -->
   <div id="animeModal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex-col p-4 overflow-y-auto">
-    <button id="closeModal" class="self-end text-2xl">&times;</button>
+    <button id="closeModal" class="self-end text-2xl">×</button>
     <img id="modalImage" class="w-full h-48 object-cover rounded mb-4">
     <h2 id="modalTitle" class="text-2xl font-bold mb-2"></h2>
     <p id="modalSynopsis" class="mb-4"></p>
@@ -39,6 +55,6 @@
   </div>
 
   <script src="js/data.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/anime.js"></script>
 </body>
 </html>
