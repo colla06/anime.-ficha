@@ -99,7 +99,7 @@ function populateExistingAnime() {
   });
 }
 
-// Autocomplete for MyAnimeList ID (admin page)
+// Autocomplete for MyAnimeList ID (generador page)
 if (document.getElementById('fetchAnime')) {
   document.getElementById('fetchAnime').addEventListener('click', debounce(async () => {
     const id = document.getElementById('animeId').value;
@@ -139,7 +139,7 @@ if (document.getElementById('addEpisode')) {
   });
 }
 
-// Generator form submission (admin page)
+// Generator form submission (generador page)
 if (document.getElementById('animeForm')) {
   document.getElementById('animeForm').addEventListener('submit', (e) => {
     e.preventDefault();
