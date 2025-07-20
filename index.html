@@ -15,22 +15,12 @@
   <header class="p-4 sticky top-0 bg-black z-10">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">AYSDO</h1>
-      <input type="text" id="searchInput" placeholder="Buscar anime..." class="p-2 rounded bg-gray-900 text-white w-2/3 focus:outline-none">
+      <div class="relative w-2/3">
+        <input type="text" id="searchInput" placeholder="Buscar anime..." class="p-2 rounded bg-gray-900 text-white w-full focus:outline-none">
+        <div id="searchSuggestions" class="absolute w-full bg-gray-900 rounded mt-1 max-h-60 overflow-y-auto hidden"></div>
+      </div>
     </div>
   </header>
-
-  <!-- Generator Form -->
-  <section id="generator" class="p-4">
-    <h2 class="text-xl font-semibold mb-4">Añadir Anime</h2>
-    <form id="animeForm" class="space-y-4">
-      <input type="text" id="animeSearch" placeholder="Buscar en MyAnimeList..." class="p-2 rounded bg-gray-900 text-white w-full">
-      <input type="text" id="animeTitle" placeholder="Título" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <input type="text" id="animeImage" placeholder="URL de la imagen" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <textarea id="animeSynopsis" placeholder="Sinopsis" class="p-2 rounded bg-gray-900 text-white w-full" required></textarea>
-      <input type="text" id="episode1Url" placeholder="URL del capítulo 1 (mpv://...)" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <button type="submit" class="p-2 bg-blue-600 rounded w-full">Añadir Anime</button>
-    </form>
-  </section>
 
   <!-- Latest Episodes Section -->
   <section id="latestEpisodes" class="p-4">
