@@ -1,76 +1,50 @@
+/* Custom styles for AMOLED dark theme and mobile optimization */
 body {
-  background-color: #000000;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+  background-color: #000;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
 }
 
-header {
-  background-color: #1a1a1a;
-  padding: 10px;
-  text-align: center;
+input::placeholder, textarea::placeholder {
+  color: #888;
 }
 
-h1 {
-  margin: 0;
-  font-size: 24px;
+.card {
+  transition: transform 0.2s;
 }
 
-.search-bar {
-  margin: 10px;
+.card:hover {
+  transform: scale(1.05);
 }
 
-.search-bar input {
-  padding: 8px;
-  width: 80%;
-  max-width: 300px;
-  border: none;
-  border-radius: 5px;
+.watched {
+  color: #4ade80;
 }
 
-.anime-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
+button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.anime-card {
-  background-color: #1a1a1a;
-  border-radius: 5px;
-  width: 150px;
-  text-align: center;
-  padding: 10px;
+#animeModal::-webkit-scrollbar, #searchSuggestions::-webkit-scrollbar {
+  width: 8px;
 }
 
-.anime-card img {
-  width: 100%;
-  border-radius: 5px;
+#animeModal::-webkit-scrollbar-thumb, #searchSuggestions::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
 }
 
-.anime-details {
-  padding: 10px;
+textarea {
+  resize: none;
+  height: 100px;
 }
 
-.episode-list {
-  list-style: none;
-  padding: 0;
+.suggestion {
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.episode-item {
-  background-color: #1a1a1a;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-@media (max-width: 600px) {
-  .anime-card {
-    width: 45%;
-  }
+.suggestion:hover {
+  background-color: #1f2937;
 }
