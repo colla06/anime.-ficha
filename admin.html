@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <title>AYSDO - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-black text-white font-sans">
+  <!-- Admin Login -->
+  <section id="adminLogin" class="p-4">
+    <h1 class="text-2xl font-bold mb-4">AYSDO - Admin</h1>
+    <input type="password" id="adminPassword" placeholder="Contraseña" class="p-2 rounded bg-gray-900 text-white w-full mb-4">
+    <button id="loginButton" class="p-2 bg-blue-600 rounded w-full">Iniciar Sesión</button>
+    <div id="loginError" class="hidden text-red-400 text-center mt-2"></div>
+  </section>
+
+  <!-- Generator Form (hidden until login) -->
+  <section id="generator" class="p-4 hidden">
+    <h2 class="text-xl font-semibold mb-4">Añadir Anime</h2>
+    <div id="loading" class="hidden text-center text-gray-400">Cargando...</div>
+    <div id="error" class="hidden text-center text-red-400"></div>
+    <form id="animeForm" class="space-y-4">
+      <input type="text" id="animeSearch" placeholder="Buscar en MyAnimeList..." class="p-2 rounded bg-gray-900 text-white w-full">
+      <input type="text" id="animeTitle" placeholder="Título" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <input type="text" id="animeImage" placeholder="URL de la imagen" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <textarea id="animeSynopsis" placeholder="Sinopsis" class="p-2 rounded bg-gray-900 text-white w-full" required></textarea>
+      <input type="text" id="episode1Url" placeholder="URL del capítulo 1 (mpv://...)" class="p-2 rounded bg-gray-900 text-white w-full" required>
+      <button type="submit" class="p-2 bg-blue-600 rounded w-full">Añadir Anime</button>
+    </form>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/anime.js"></script>
+</body>
+</html>
