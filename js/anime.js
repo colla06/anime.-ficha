@@ -20,21 +20,25 @@ async function searchMyAnimeListById(id) {
     document.getElementById('loading')?.classList.remove('hidden');
     document.getElementById('error')?.classList.add('hidden');
     const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+    if (!response.ok) throw new Error('API request failed');
     const data = await response.json();
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Delay to respect API limits
     document.getElementById('loading')?.classList.add('hidden');
     if (data.data) {
-      return {
+      const anime = {
         title: data.data.title || "Sin título",
         image: data.data.images.jpg.large_image_url || "https://via.placeholder.com/150",
         synopsis: await translateSynopsis(data.data.synopsis || "Sin sinopsis disponible.")
       };
+      console.log('Anime fetched:', anime);
+      return anime;
     }
-    document.getElementById('error').textContent = 'No se encontró el anime con ese ID.';
+    document.getElementById('error').textContent = `No se encontró el anime con ID ${id}. Verifica el ID en MyAnimeList.`;
     document.getElementById('error').classList.remove('hidden');
     return null;
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error').textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
+    document.getElementById('error').textContent = 'Error al conectar con MyAnimeList. Revisa tu conexión o intenta más tarde.';
     document.getElementById('error').classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return null;
@@ -47,7 +51,9 @@ async function searchMyAnimeList(query) {
     document.getElementById('loading')?.classList.remove('hidden');
     document.getElementById('error')?.classList.add('hidden');
     const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=5`);
+    if (!response.ok) throw new Error('API request failed');
     const data = await response.json();
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Delay to respect API limits
     document.getElementById('loading')?.classList.add('hidden');
     if (data.data && data.data.length > 0) {
       return await Promise.all(data.data.map(async anime => ({
@@ -61,7 +67,7 @@ async function searchMyAnimeList(query) {
     return [];
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error')?.textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
+    document.getElementById('error').textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
     document.getElementById('error')?.classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return [];
