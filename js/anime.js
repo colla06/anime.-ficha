@@ -1,7 +1,34 @@
 // Local storage for watched episodes
 const watchedEpisodes = JSON.parse(localStorage.getItem('watchedEpisodes')) || {};
 
-// MyAnimeList API (using Jikan API)
+// MyAnimeList API (using Jikan API by ID)
+async function searchMyAnimeListById(id) {
+  try {
+    document.getElementById('loading')?.classList.remove('hidden');
+    document.getElementById('error')?.classList.add('hidden');
+    const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+    const data = await response.json();
+    document.getElementById('loading')?.classList.add('hidden');
+    if (data.data) {
+      return {
+        title: data.data.title,
+        image: data.data.images.jpg.large_image_url,
+        synopsis: await translateSynopsis(data.data.synopsis || "Sin sinopsis disponible.")
+      };
+    }
+    document.getElementById('error')?.textContent = 'No se encontró el anime con ese ID.';
+    document.getElementById('error')?.classList.remove('hidden');
+    return null;
+  } catch (error) {
+    document.getElementById('loading')?.classList.add('hidden');
+    document.getElementById('error')?.textContent = 'Error al buscar en MyAnimeList.';
+    document.getElementById('error')?.classList.remove('hidden');
+    console.error('Error fetching from MyAnimeList:', error);
+    return null;
+  }
+}
+
+// MyAnimeList API (using Jikan API for search suggestions)
 async function searchMyAnimeList(query) {
   try {
     document.getElementById('loading')?.classList.remove('hidden');
@@ -40,14 +67,13 @@ async function translateSynopsis(text) {
   }
 }
 
-// Autocomplete for MyAnimeList search (admin page)
-if (document.getElementById('animeSearch')) {
-  document.getElementById('animeSearch').addEventListener('input', async (e) => {
-    const query = e.target.value;
-    if (query.length < 3) return;
-    const animes = await searchMyAnimeList(query);
-    if (animes.length > 0) {
-      const anime = animes[0];
+// Autocomplete for MyAnimeList ID (admin page)
+if (document.getElementById('animeId')) {
+  document.getElementById('animeId').addEventListener('input', async (e) => {
+    const id = e.target.value;
+    if (!id || isNaN(id)) return;
+    const anime = await searchMyAnimeListById(id);
+    if (anime) {
       document.getElementById('animeTitle').value = anime.title;
       document.getElementById('animeImage').value = anime.image;
       document.getElementById('animeSynopsis').value = anime.synopsis;
@@ -81,20 +107,6 @@ if (document.getElementById('animeForm')) {
     document.getElementById('animeForm').reset();
     document.getElementById('error').classList.add('hidden');
     alert('Anime añadido con éxito.');
-  });
-}
-
-// Admin login
-if (document.getElementById('adminLogin')) {
-  document.getElementById('loginButton').addEventListener('click', () => {
-    const password = document.getElementById('adminPassword').value;
-    if (password === 'admin123') { // Cambia esto en producción
-      document.getElementById('adminLogin').classList.add('hidden');
-      document.getElementById('generator').classList.remove('hidden');
-    } else {
-      document.getElementById('loginError').textContent = 'Contraseña incorrecta.';
-      document.getElementById('loginError').classList.remove('hidden');
-    }
   });
 }
 
