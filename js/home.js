@@ -1,22 +1,17 @@
-function searchAnime() {
-  const query = document.getElementById('search-input').value;
-  window.location.href = `search.html?q=${encodeURIComponent(query)}`;
-}
+// Mock anime data (will be updated by generator)
+let animeData = [
+  {
+    id: 1,
+    title: "Demon Slayer",
+    image: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
+    synopsis: "Un joven lucha contra demonios para salvar a su hermana.",
+    episodes: [
+      { number: 1, title: "Episodio 1", url: "mpv://example.com/demon-slayer-ep1.mp4" }
+    ]
+  }
+];
 
-fetch('https://api.jikan.moe/v4/seasons/now')
-  .then(response => response.json())
-  .then(data => {
-    const animeGrid = document.getElementById('anime-grid');
-    data.data.forEach(anime => {
-      const card = document.createElement('div');
-      card.className = 'anime-card';
-      card.innerHTML = `
-        <a href="anime.html?id=${anime.mal_id}">
-          <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
-          <h3>${anime.title}</h3>
-          <p>Episodios: ${anime.episodes || 'N/A'}</p>
-        </a>
-      `;
-      animeGrid.appendChild(card);
-    });
-  });
+// Mock latest episodes
+let latestEpisodes = [
+  { anime: "Demon Slayer", episode: animeData[0].episodes[0] }
+];
