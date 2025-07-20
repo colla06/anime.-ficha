@@ -1,6 +1,19 @@
 // Local storage for watched episodes
 const watchedEpisodes = JSON.parse(localStorage.getItem('watchedEpisodes')) || {};
 
+// Debounce function to limit API calls
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 // MyAnimeList API (using Jikan API by ID)
 async function searchMyAnimeListById(id) {
   try {
@@ -11,18 +24,18 @@ async function searchMyAnimeListById(id) {
     document.getElementById('loading')?.classList.add('hidden');
     if (data.data) {
       return {
-        title: data.data.title,
-        image: data.data.images.jpg.large_image_url,
+        title: data.data.title || "Sin título",
+        image: data.data.images.jpg.large_image_url || "https://via.placeholder.com/150",
         synopsis: await translateSynopsis(data.data.synopsis || "Sin sinopsis disponible.")
       };
     }
-    document.getElementById('error')?.textContent = 'No se encontró el anime con ese ID.';
-    document.getElementById('error')?.classList.remove('hidden');
+    document.getElementById('error').textContent = 'No se encontró el anime con ese ID.';
+    document.getElementById('error').classList.remove('hidden');
     return null;
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error')?.textContent = 'Error al buscar en MyAnimeList.';
-    document.getElementById('error')?.classList.remove('hidden');
+    document.getElementById('error').textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
+    document.getElementById('error').classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return null;
   }
@@ -38,17 +51,17 @@ async function searchMyAnimeList(query) {
     document.getElementById('loading')?.classList.add('hidden');
     if (data.data && data.data.length > 0) {
       return await Promise.all(data.data.map(async anime => ({
-        title: anime.title,
-        image: anime.images.jpg.large_image_url,
+        title: anime.title || "Sin título",
+        image: anime.images.jpg.large_image_url || "https://via.placeholder.com/150",
         synopsis: await translateSynopsis(anime.synopsis || "Sin sinopsis disponible.")
       })));
     }
-    document.getElementById('error')?.textContent = 'No se encontró el anime.';
+    document.getElementById('error')?.textContent = 'No se encontraron animes.';
     document.getElementById('error')?.classList.remove('hidden');
     return [];
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error')?.textContent = 'Error al buscar en MyAnimeList.';
+    document.getElementById('error')?.textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
     document.getElementById('error')?.classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return [];
@@ -58,7 +71,7 @@ async function searchMyAnimeList(query) {
 // Translate synopsis using MyMemory API
 async function translateSynopsis(text) {
   try {
-    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|es`);
+    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.substring(0, 500))}&langpair=en|es`);
     const data = await response.json();
     return data.responseData.translatedText || text;
   } catch (error) {
@@ -82,7 +95,7 @@ function populateExistingAnime() {
 
 // Autocomplete for MyAnimeList ID (admin page)
 if (document.getElementById('fetchAnime')) {
-  document.getElementById('fetchAnime').addEventListener('click', async () => {
+  document.getElementById('fetchAnime').addEventListener('click', debounce(async () => {
     const id = document.getElementById('animeId').value;
     if (!id || isNaN(id)) {
       document.getElementById('error').textContent = 'Por favor, ingrese un ID válido.';
@@ -96,7 +109,7 @@ if (document.getElementById('fetchAnime')) {
       document.getElementById('animeSynopsis').value = anime.synopsis;
       document.getElementById('existingAnime').value = '';
     }
-  });
+  }, 500));
 }
 
 // Add episode field dynamically
@@ -113,7 +126,9 @@ if (document.getElementById('addEpisode')) {
     `;
     container.appendChild(newField);
     newField.querySelector('.remove-episode').addEventListener('click', () => {
-      newField.remove();
+      if (container.querySelectorAll('.episode-field').length > 1) {
+        newField.remove();
+      }
     });
   });
 }
@@ -133,13 +148,26 @@ if (document.getElementById('animeForm')) {
         document.getElementById('error').classList.remove('hidden');
         throw new Error('Invalid URL');
       }
+      if (!number || isNaN(number) || number <= 0) {
+        document.getElementById('error').textContent = 'El número de episodio debe ser mayor a 0.';
+        document.getElementById('error').classList.remove('hidden');
+        throw new Error('Invalid episode number');
+      }
       return { number: parseInt(number), title, url };
     });
 
+    // Validate unique episode numbers for existing anime
     if (existingAnimeId) {
-      // Add episodes to existing anime
       const anime = animeData.find(a => a.id == existingAnimeId);
       if (anime) {
+        const existingNumbers = anime.episodes.map(ep => ep.number);
+        for (const ep of episodes) {
+          if (existingNumbers.includes(ep.number)) {
+            document.getElementById('error').textContent = `El episodio ${ep.number} ya existe para este anime.`;
+            document.getElementById('error').classList.remove('hidden');
+            return;
+          }
+        }
         episodes.forEach(ep => {
           anime.episodes.push(ep);
           latestEpisodes.push({ anime: anime.title, episode: ep });
@@ -160,6 +188,11 @@ if (document.getElementById('animeForm')) {
       }
     } else {
       // Create new anime
+      if (!document.getElementById('animeTitle').value || !document.getElementById('animeImage').value || !document.getElementById('animeSynopsis').value) {
+        document.getElementById('error').textContent = 'Por favor, complete todos los campos.';
+        document.getElementById('error').classList.remove('hidden');
+        return;
+      }
       const newAnime = {
         id: animeData.length + 1,
         title: document.getElementById('animeTitle').value,
@@ -177,7 +210,7 @@ if (document.getElementById('animeForm')) {
       document.getElementById('episodesContainer').innerHTML = `
         <div class="episode-field flex space-x-2">
           <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
-          <input type="text" class="портал" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
+          <input type="text" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
           <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
           <button type="button" class="remove-episode p-2 bg-red-600 rounded hidden">✕</button>
         </div>
@@ -191,7 +224,7 @@ if (document.getElementById('animeForm')) {
 
 // Search suggestions (main page)
 if (document.getElementById('searchInput')) {
-  document.getElementById('searchInput').addEventListener('input', async (e) => {
+  document.getElementById('searchInput').addEventListener('input', debounce(async (e) => {
     const query = e.target.value;
     const suggestionsContainer = document.getElementById('searchSuggestions');
     suggestionsContainer.innerHTML = '';
@@ -221,7 +254,7 @@ if (document.getElementById('searchInput')) {
       suggestionsContainer.classList.add('hidden');
     }
     renderAnimeList(query);
-  });
+  }, 500));
 }
 
 // Render latest episodes
@@ -233,7 +266,7 @@ function renderLatestEpisodes() {
     const isWatched = watchedEpisodes[`${item.anime}-${item.episode.number}`];
     const card = `
       <div class="card p-4 bg-gray-900 rounded flex items-center">
-        <img src="${animeData.find(a => a.title === item.anime).image}" class="w-16 h-20 object-cover rounded mr-4">
+        <img src="${animeData.find(a => a.title === item.anime)?.image || 'https://via.placeholder.com/150'}" class="w-16 h-20 object-cover rounded mr-4">
         <div>
           <h3 class="font-semibold">${item.anime}</h3>
           <p>${item.episode.title}</p>
@@ -278,7 +311,7 @@ function showAnimeDetails(animeId) {
   
   const episodesContainer = document.getElementById('modalEpisodes');
   episodesContainer.innerHTML = '';
-  anime.episodes.forEach(ep => {
+  anime.episodes.sort((a, b) => a.number - b.number).forEach(ep => {
     const isWatched = watchedEpisodes[`${anime.title}-${ep.number}`];
     const li = `
       <li class="flex justify-between items-center">
