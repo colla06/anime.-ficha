@@ -1,44 +1,50 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  <title>AYSDO - Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body class="bg-black text-white font-sans">
-  <!-- Generator Form -->
-  <section id="generator" class="p-4">
-    <h1 class="text-2xl font-bold mb-4">AYSDO - Añadir Anime</h1>
-    <div id="loading" class="hidden text-center text-gray-400">Cargando...</div>
-    <div id="error" class="hidden text-center text-red-400"></div>
-    <form id="animeForm" class="space-y-4">
-      <div class="flex space-x-2">
-        <input type="number" id="animeId" placeholder="ID de MyAnimeList (ej. 38000)" class="p-2 rounded bg-gray-900 text-white w-full" required>
-        <button type="button" id="fetchAnime" class="p-2 bg-green-600 rounded">Obtener Datos</button>
-      </div>
-      <select id="existingAnime" class="p-2 rounded bg-gray-900 text-white w-full">
-        <option value="">Seleccionar anime existente (para añadir episodios)</option>
-      </select>
-      <input type="text" id="animeTitle" placeholder="Título" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <input type="text" id="animeImage" placeholder="URL de la imagen" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <textarea id="animeSynopsis" placeholder="Sinopsis" class="p-2 rounded bg-gray-900 text-white w-full" required></textarea>
-      <div id="episodesContainer" class="space-y-2">
-        <div class="episode-field flex space-x-2">
-          <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
-          <input type="text" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
-          <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
-          <button type="button" class="remove-episode p-2 bg-red-600 rounded hidden">✕</button>
-        </div>
-      </div>
-      <button type="button" id="addEpisode" class="p-2 bg-blue-600 rounded w-full">Añadir Episodio</button>
-      <button type="submit" class="p-2 bg-blue-600 rounded w-full">Guardar Anime/Episodio</button>
-    </form>
-  </section>
+/* Custom styles for AMOLED dark theme and mobile optimization */
+body {
+  background-color: #000;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  <script src="js/data.js"></script>
-  <script src="js/anime.js"></script>
-</body>
-</html>
+input::placeholder, textarea::placeholder {
+  color: #888;
+}
+
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.watched {
+  color: #4ade80;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+#animeModal::-webkit-scrollbar, #searchSuggestions::-webkit-scrollbar {
+  width: 8px;
+}
+
+#animeModal::-webkit-scrollbar-thumb, #searchSuggestions::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: none;
+  height: 100px;
+}
+
+.suggestion {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion:hover {
+  background-color: #1f2937;
+}
