@@ -2,43 +2,66 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  <title>AYSDO - Generador</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <title>Generador de Fichas</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input, button { padding: 10px; margin: 5px; }
+    #output { white-space: pre-wrap; background: #f9f9f9; padding: 10px; border: 1px solid #ccc; margin-top: 10px; }
+  </style>
 </head>
-<body class="bg-black text-white font-sans">
-  <!-- Generator Form -->
-  <section id="generator" class="p-4">
-    <h1 class="text-2xl font-bold mb-4">AYSDO - Añadir Anime</h1>
-    <div id="loading" class="hidden text-center text-gray-400">Cargando...</div>
-    <div id="error" class="hidden text-center text-red-400"></div>
-    <form id="animeForm" class="space-y-4">
-      <div class="flex space-x-2">
-        <input type="number" id="animeId" placeholder="ID de MyAnimeList (ej. 38000)" class="p-2 rounded bg-gray-900 text-white w-full" required>
-        <button type="button" id="fetchAnime" class="p-2 bg-green-600 rounded">Obtener Datos</button>
-      </div>
-      <select id="existingAnime" class="p-2 rounded bg-gray-900 text-white w-full">
-        <option value="">Seleccionar anime existente (para añadir episodios)</option>
-      </select>
-      <input type="text" id="animeTitle" placeholder="Título" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <input type="text" id="animeImage" placeholder="URL de la imagen" class="p-2 rounded bg-gray-900 text-white w-full" required>
-      <textarea id="animeSynopsis" placeholder="Sinopsis" class="p-2 rounded bg-gray-900 text-white w-full" required></textarea>
-      <div id="episodesContainer" class="space-y-2">
-        <div class="episode-field flex space-x-2">
-          <input type="number" class="episode-number p-2 rounded bg-gray-900 text-white w-1/4" placeholder="Nº" required>
-          <input type="text" class="episode-title p-2 rounded bg-gray-900 text-white w-2/4" placeholder="Título del episodio" required>
-          <input type="text" class="episode-url p-2 rounded bg-gray-900 text-white w-2/4" placeholder="URL (mpv://...)" required>
-          <button type="button" class="remove-episode p-2 bg-red-600 rounded hidden">✕</button>
-        </div>
-      </div>
-      <button type="button" id="addEpisode" class="p-2 bg-blue-600 rounded w-full">Añadir Episodio</button>
-      <button type="submit" class="p-2 bg-blue-600 rounded w-full">Guardar Anime/Episodio</button>
-    </form>
-  </section>
+<body>
+  <h1>Generador de ficha con MAL ID</h1>
+  <input type="text" id="animeIdInput" placeholder="Introduce el ID de MyAnimeList">
+  <button onclick="generarFicha()">Generar</button>
 
-  <script src="js/data.js"></script>
-  <script src="js/anime.js"></script>
+  <div id="output"></div>
+
+  <script>
+    async function generarFicha() {
+      const id = document.getElementById("animeIdInput").value.trim();
+      const output = document.getElementById("output");
+
+      if (!id) {
+        output.innerText = "Por favor, introduce un ID.";
+        return;
+      }
+
+      output.innerText = "Cargando datos...";
+
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/full`);
+        const data = await res.json();
+        const anime = data.data;
+
+        const title = anime.title;
+        const image = anime.images.jpg.large_image_url;
+        const synopsis = anime.synopsis.replace(/\n/g, " ").trim();
+
+        // Episodio 1 como demo (puedes hacer un fetch a /episodes si quieres todos)
+        const episode = {
+          number: 1,
+          title: "Episodio 1",
+          url: `mpv://example.com/${title.toLowerCase().replace(/\s+/g, "-")}-ep1.mp4`
+        };
+
+        const ficha = {
+          id: parseInt(id),
+          title,
+          image,
+          synopsis,
+          episodes: [episode]
+        };
+
+        const fichaJSON = JSON.stringify(ficha, null, 2);
+        output.innerText = fichaJSON;
+
+        // Copia automática al portapapeles
+        navigator.clipboard.writeText(fichaJSON);
+      } catch (e) {
+        output.innerText = "Error al obtener datos. Asegúrate de que el ID es correcto.";
+        console.error(e);
+      }
+    }
+  </script>
 </body>
 </html>
