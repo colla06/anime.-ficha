@@ -19,7 +19,7 @@ async function searchMyAnimeListById(id) {
   try {
     document.getElementById('loading')?.classList.remove('hidden');
     document.getElementById('error')?.classList.add('hidden');
-    console.log(`Fetching anime with ID: ${id}`);
+    console.log(`Attempting to fetch anime with ID: ${id}`);
     const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
     if (!response.ok) {
       const errorText = await response.text();
@@ -37,12 +37,10 @@ async function searchMyAnimeListById(id) {
       console.log('Anime fetched successfully:', anime);
       return anime;
     }
-    document.getElementById('error').textContent = `No se encontró el anime con ID ${id}. Verifica el ID en MyAnimeList.`;
-    document.getElementById('error').classList.remove('hidden');
-    return null;
+    throw new Error(`No data found for ID ${id}`);
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error').textContent = `Error al conectar con MyAnimeList: ${error.message}. Intenta de nuevo o verifica tu conexión.`;
+    document.getElementById('error').textContent = `Error: ${error.message}. Verifica el ID o intenta más tarde.`;
     document.getElementById('error').classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return null;
@@ -72,7 +70,7 @@ async function searchMyAnimeList(query) {
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
     document.getElementById('error').textContent = 'Error al buscar en MyAnimeList. Intente de nuevo.';
-    document.getElementById('error')?.classList.remove('hidden');
+    document.getElementById('error').classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return [];
   }
@@ -196,6 +194,8 @@ if (document.getElementById('animeForm')) {
         });
         localStorage.setItem('animeData', JSON.stringify(animeData));
         localStorage.setItem('latestEpisodes', JSON.stringify(latestEpisodes));
+        console.log('Updated animeData:', animeData);
+        console.log('Updated latestEpisodes:', latestEpisodes);
         document.getElementById('animeForm').reset();
         document.getElementById('episodesContainer').innerHTML = `
           <div class="episode-field flex space-x-2">
@@ -208,6 +208,7 @@ if (document.getElementById('animeForm')) {
         document.getElementById('error').classList.add('hidden');
         alert('Episodios añadidos con éxito.');
         renderLatestEpisodes(); // Refresh latest episodes
+        populateExistingAnime(); // Refresh dropdown
       }
     } else {
       // Create new anime
@@ -229,6 +230,8 @@ if (document.getElementById('animeForm')) {
       });
       localStorage.setItem('animeData', JSON.stringify(animeData));
       localStorage.setItem('latestEpisodes', JSON.stringify(latestEpisodes));
+      console.log('New anime added:', newAnime);
+      console.log('Updated latestEpisodes:', latestEpisodes);
       document.getElementById('animeForm').reset();
       document.getElementById('episodesContainer').innerHTML = `
         <div class="episode-field flex space-x-2">
@@ -382,6 +385,8 @@ function loadData() {
   const savedLatest = localStorage.getItem('latestEpisodes');
   if (savedAnime) animeData = JSON.parse(savedAnime);
   if (savedLatest) latestEpisodes = JSON.parse(savedLatest);
+  console.log('Loaded animeData:', animeData);
+  console.log('Loaded latestEpisodes:', latestEpisodes);
 }
 
 // Initial render
