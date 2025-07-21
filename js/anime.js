@@ -19,8 +19,12 @@ async function searchMyAnimeListById(id) {
   try {
     document.getElementById('loading')?.classList.remove('hidden');
     document.getElementById('error')?.classList.add('hidden');
+    console.log(`Fetching anime with ID: ${id}`);
     const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
-    if (!response.ok) throw new Error('API request failed');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
+    }
     const data = await response.json();
     await new Promise(resolve => setTimeout(resolve, 2000)); // Delay to respect API limits
     document.getElementById('loading')?.classList.add('hidden');
@@ -30,7 +34,7 @@ async function searchMyAnimeListById(id) {
         image: data.data.images.jpg.large_image_url || "https://via.placeholder.com/150",
         synopsis: await translateSynopsis(data.data.synopsis || "Sin sinopsis disponible.")
       };
-      console.log('Anime fetched:', anime);
+      console.log('Anime fetched successfully:', anime);
       return anime;
     }
     document.getElementById('error').textContent = `No se encontró el anime con ID ${id}. Verifica el ID en MyAnimeList.`;
@@ -38,7 +42,7 @@ async function searchMyAnimeListById(id) {
     return null;
   } catch (error) {
     document.getElementById('loading')?.classList.add('hidden');
-    document.getElementById('error').textContent = 'Error al conectar con MyAnimeList. Revisa tu conexión o intenta más tarde.';
+    document.getElementById('error').textContent = `Error al conectar con MyAnimeList: ${error.message}. Intenta de nuevo o verifica tu conexión.`;
     document.getElementById('error').classList.remove('hidden');
     console.error('Error fetching from MyAnimeList:', error);
     return null;
@@ -102,9 +106,9 @@ function populateExistingAnime() {
 // Autocomplete for MyAnimeList ID (generador page)
 if (document.getElementById('fetchAnime')) {
   document.getElementById('fetchAnime').addEventListener('click', debounce(async () => {
-    const id = document.getElementById('animeId').value;
+    const id = document.getElementById('animeId').value.trim();
     if (!id || isNaN(id)) {
-      document.getElementById('error').textContent = 'Por favor, ingrese un ID válido.';
+      document.getElementById('error').textContent = 'Por favor, ingrese un ID válido (número).';
       document.getElementById('error').classList.remove('hidden');
       return;
     }
@@ -114,6 +118,7 @@ if (document.getElementById('fetchAnime')) {
       document.getElementById('animeImage').value = anime.image;
       document.getElementById('animeSynopsis').value = anime.synopsis;
       document.getElementById('existingAnime').value = '';
+      document.getElementById('error').classList.add('hidden');
     }
   }, 500));
 }
@@ -146,21 +151,32 @@ if (document.getElementById('animeForm')) {
     const existingAnimeId = document.getElementById('existingAnime').value;
     const episodeFields = document.querySelectorAll('.episode-field');
     const episodes = Array.from(episodeFields).map(field => {
-      const number = field.querySelector('.episode-number').value;
-      const title = field.querySelector('.episode-title').value;
-      const url = field.querySelector('.episode-url').value;
-      if (!url.startsWith('mpv://')) {
-        document.getElementById('error').textContent = 'Todas las URLs deben comenzar con mpv://';
+      const number = field.querySelector('.episode-number').value.trim();
+      const title = field.querySelector('.episode-title').value.trim();
+      const url = field.querySelector('.episode-url').value.trim();
+      if (!url || !url.startsWith('mpv://')) {
+        document.getElementById('error').textContent = 'Todas las URLs deben comenzar con mpv:// y no estar vacías.';
         document.getElementById('error').classList.remove('hidden');
-        throw new Error('Invalid URL');
+        return null;
       }
       if (!number || isNaN(number) || number <= 0) {
-        document.getElementById('error').textContent = 'El número de episodio debe ser mayor a 0.';
+        document.getElementById('error').textContent = 'El número de episodio debe ser un número mayor a 0 y no estar vacío.';
         document.getElementById('error').classList.remove('hidden');
-        throw new Error('Invalid episode number');
+        return null;
+      }
+      if (!title) {
+        document.getElementById('error').textContent = 'El título del episodio no puede estar vacío.';
+        document.getElementById('error').classList.remove('hidden');
+        return null;
       }
       return { number: parseInt(number), title, url };
-    });
+    }).filter(ep => ep !== null);
+
+    if (episodes.length === 0) {
+      document.getElementById('error').textContent = 'Debe haber al menos un episodio válido.';
+      document.getElementById('error').classList.remove('hidden');
+      return;
+    }
 
     // Validate unique episode numbers for existing anime
     if (existingAnimeId) {
@@ -191,19 +207,20 @@ if (document.getElementById('animeForm')) {
         `;
         document.getElementById('error').classList.add('hidden');
         alert('Episodios añadidos con éxito.');
+        renderLatestEpisodes(); // Refresh latest episodes
       }
     } else {
       // Create new anime
-      if (!document.getElementById('animeTitle').value || !document.getElementById('animeImage').value || !document.getElementById('animeSynopsis').value) {
+      if (!document.getElementById('animeTitle').value.trim() || !document.getElementById('animeImage').value.trim() || !document.getElementById('animeSynopsis').value.trim()) {
         document.getElementById('error').textContent = 'Por favor, complete todos los campos.';
         document.getElementById('error').classList.remove('hidden');
         return;
       }
       const newAnime = {
         id: animeData.length + 1,
-        title: document.getElementById('animeTitle').value,
-        image: document.getElementById('animeImage').value,
-        synopsis: document.getElementById('animeSynopsis').value,
+        title: document.getElementById('animeTitle').value.trim(),
+        image: document.getElementById('animeImage').value.trim(),
+        synopsis: document.getElementById('animeSynopsis').value.trim(),
         episodes
       };
       animeData.push(newAnime);
@@ -223,8 +240,8 @@ if (document.getElementById('animeForm')) {
       `;
       document.getElementById('error').classList.add('hidden');
       alert('Anime añadido con éxito.');
+      populateExistingAnime(); // Refresh dropdown
     }
-    populateExistingAnime();
   });
 }
 
